@@ -2,17 +2,17 @@ PROJECT(NLOPT)
 
 #==============================================================================
 # NLOPT CMake file
-# 
-# NLopt is a free/open-source library for nonlinear optimization, providing 
-# a common interface for a number of different free optimization routines 
-# available online as well as original implementations of various other 
+#
+# NLopt is a free/open-source library for nonlinear optimization, providing
+# a common interface for a number of different free optimization routines
+# available online as well as original implementations of various other
 # algorithms
-# WEBSITE: http://ab-initio.mit.edu/wiki/index.php/NLopt 
+# WEBSITE: http://ab-initio.mit.edu/wiki/index.php/NLopt
 # AUTHOR: Steven G. Johnson
 #
 # This CMakeLists.txt file was created to compile NLOPT with the CMAKE utility.
 # Benoit Scherrer, 2010 CRL, Harvard Medical School
-# Copyright (c) 2008-2009 Children's Hospital Boston 
+# Copyright (c) 2008-2009 Children's Hospital Boston
 #==============================================================================
 
 
@@ -51,6 +51,8 @@ IF(NOT HAVE_UINT32_T)
     SET(uint32_t "unsigned int")
     SET(SIZEOF_UNSIGNED_INT 4)
   ENDIF(MSVC)
+else()
+  add_definitions(-DHAVE_UINT32_T=1)
 ENDIF(NOT HAVE_UINT32_T)
 
 #==============================================================================
@@ -59,21 +61,21 @@ ENDIF(NOT HAVE_UINT32_T)
 
 FILE( READ configure.ac CONFIG_AUTOMAKE )
 
-STRING( REGEX MATCH "AC_INIT\\(nlopt, ([0-9]+\\.[0-9]+\\.?[0-9]*)" NLOPT_AUTOMAKE_LINE_VERSION "${CONFIG_AUTOMAKE}") 
+STRING( REGEX MATCH "AC_INIT\\(nlopt, ([0-9]+\\.[0-9]+\\.?[0-9]*)" NLOPT_AUTOMAKE_LINE_VERSION "${CONFIG_AUTOMAKE}")
 
 #---------------------------------
 # If version matches 'X.X.X'
 #---------------------------------
 IF(${NLOPT_AUTOMAKE_LINE_VERSION} MATCHES ".*[0-9]+\\.[0-9]+\\.[0-9]+")
-    STRING( REGEX REPLACE ".*([0-9]+)\\.[0-9]+\\.[0-9]*.*" "\\1" NLOPT_MAJOR_VERSION "${NLOPT_AUTOMAKE_LINE_VERSION}") 
-    STRING( REGEX REPLACE ".*[0-9]+\\.([0-9]+)\\.[0-9]*.*" "\\1" NLOPT_MINOR_VERSION "${NLOPT_AUTOMAKE_LINE_VERSION}") 
-    STRING( REGEX REPLACE ".*[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" NLOPT_BUGFIX_VERSION "${NLOPT_AUTOMAKE_LINE_VERSION}") 
+    STRING( REGEX REPLACE ".*([0-9]+)\\.[0-9]+\\.[0-9]*.*" "\\1" NLOPT_MAJOR_VERSION "${NLOPT_AUTOMAKE_LINE_VERSION}")
+    STRING( REGEX REPLACE ".*[0-9]+\\.([0-9]+)\\.[0-9]*.*" "\\1" NLOPT_MINOR_VERSION "${NLOPT_AUTOMAKE_LINE_VERSION}")
+    STRING( REGEX REPLACE ".*[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" NLOPT_BUGFIX_VERSION "${NLOPT_AUTOMAKE_LINE_VERSION}")
 #---------------------------------
 # Else (consider that version matches 'X.X')
 #---------------------------------
 ELSE(${NLOPT_AUTOMAKE_LINE_VERSION} MATCHES ".*[0-9]+\\.[0-9]+\\.[0-9]+")
-    STRING( REGEX REPLACE ".*([0-9]+)\\.[0-9]+.*" "\\1" NLOPT_MAJOR_VERSION "${NLOPT_AUTOMAKE_LINE_VERSION}") 
-    STRING( REGEX REPLACE ".*[0-9]+\\.([0-9]+).*" "\\1" NLOPT_MINOR_VERSION "${NLOPT_AUTOMAKE_LINE_VERSION}") 
+    STRING( REGEX REPLACE ".*([0-9]+)\\.[0-9]+.*" "\\1" NLOPT_MAJOR_VERSION "${NLOPT_AUTOMAKE_LINE_VERSION}")
+    STRING( REGEX REPLACE ".*[0-9]+\\.([0-9]+).*" "\\1" NLOPT_MINOR_VERSION "${NLOPT_AUTOMAKE_LINE_VERSION}")
     SET (NLOPT_BUGFIX_VERSION "0")
 ENDIF(${NLOPT_AUTOMAKE_LINE_VERSION} MATCHES ".*[0-9]+\\.[0-9]+\\.[0-9]+")
 
@@ -94,21 +96,21 @@ SET(${INCLUDE_DIRECTORIES} "")
 INCLUDE_DIRECTORIES (
 	${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_BINARY_DIR}
-	stogo 
-	util 
-	direct 
-	cdirect 
-	praxis 
-	luksan 
-	crs 
-	mlsl 
-	mma 
-	cobyla 
-	newuoa 
-	neldermead 
-	auglag 
-	bobyqa 
-	isres 
+	stogo
+	util
+	direct
+	cdirect
+	praxis
+	luksan
+	crs
+	mlsl
+	mma
+	cobyla
+	newuoa
+	neldermead
+	auglag
+	bobyqa
+	isres
 	slsqp
         esch
 	api   )
@@ -118,11 +120,11 @@ INCLUDE_DIRECTORIES (
 # nlopt LIBRARY TARGET (SHARED OR STATIC)
 #==============================================================================
 
-SET ( NLOPT_HEADERS 
+SET ( NLOPT_HEADERS
   api/nlopt.h api/nlopt.hpp api/nlopt.f
 )
 
-SET ( NLOPT_SOURCES   
+SET ( NLOPT_SOURCES
 	direct/DIRect.c direct/direct_wrap.c direct/DIRserial.c direct/DIRsubrout.c direct/direct-internal.h direct/direct.h
 	cdirect/cdirect.c cdirect/hybrid.c cdirect/cdirect.h
 	praxis/praxis.c praxis/praxis.h
@@ -131,16 +133,16 @@ SET ( NLOPT_SOURCES
 	mlsl/mlsl.c mlsl/mlsl.h
 	mma/mma.c mma/mma.h mma/ccsa_quadratic.c
 	cobyla/cobyla.c cobyla/cobyla.h
-	newuoa/newuoa.c newuoa/newuoa.h 
-	neldermead/nldrmd.c neldermead/neldermead.h neldermead/sbplx.c	 
+	newuoa/newuoa.c newuoa/newuoa.h
+	neldermead/nldrmd.c neldermead/neldermead.h neldermead/sbplx.c
 	auglag/auglag.c auglag/auglag.h
 	bobyqa/bobyqa.c bobyqa/bobyqa.h
-	isres/isres.c isres/isres.h 
-	slsqp/slsqp.c slsqp/slsqp.h 
+	isres/isres.c isres/isres.h
+	slsqp/slsqp.c slsqp/slsqp.h
 	esch/esch.c esch/esch.h
 	api/general.c api/options.c api/optimize.c api/deprecated.c api/nlopt-internal.h api/nlopt.h api/f77api.c api/f77funcs.h api/f77funcs_.h api/nlopt.hpp api/nlopt-in.hpp
-	util/mt19937ar.c util/sobolseq.c util/soboldata.h util/timer.c util/stop.c util/nlopt-util.h util/redblack.c util/redblack.h util/qsort_r.c util/rescale.c 
-	stogo/global.cc stogo/linalg.cc stogo/local.cc stogo/stogo.cc stogo/tools.cc stogo/global.h stogo/linalg.h stogo/local.h stogo/stogo_config.h stogo/stogo.h stogo/tools.h 
+	util/mt19937ar.c util/sobolseq.c util/soboldata.h util/timer.c util/stop.c util/nlopt-util.h util/redblack.c util/redblack.h util/qsort_r.c util/rescale.c
+	stogo/global.cc stogo/linalg.cc stogo/local.cc stogo/stogo.cc stogo/tools.cc stogo/global.h stogo/linalg.h stogo/local.h stogo/stogo_config.h stogo/stogo.h stogo/tools.h
         )
 
 OPTION(BUILD_SHARED_LIBS "Build NLOPT as a shared library" OFF )
@@ -152,28 +154,25 @@ ENDIF(BUILD_SHARED_LIBS)
 
 INSTALL ( FILES ${NLOPT_HEADERS} DESTINATION include )
 
-ADD_LIBRARY (nlopt ${NLOPT_SOURCES} )
+ADD_LIBRARY (feelpp_nlopt ${NLOPT_SOURCES} )
 
 # parse configure.ac for lib version
-STRING( REGEX MATCH "SHARED_VERSION_INFO=\"[0-9]+:[0-9]+:[0-9]+\"" _VERSION_INFO_LINE "${CONFIG_AUTOMAKE}") 
+STRING( REGEX MATCH "SHARED_VERSION_INFO=\"[0-9]+:[0-9]+:[0-9]+\"" _VERSION_INFO_LINE "${CONFIG_AUTOMAKE}")
 IF (_VERSION_INFO_LINE)
-  STRING( REGEX REPLACE "SHARED_VERSION_INFO=\"([0-9]+):[0-9]+:[0-9]+\"" "\\1" _VERSION_INFO_CURRENT "${_VERSION_INFO_LINE}") 
-  STRING( REGEX REPLACE "SHARED_VERSION_INFO=\"[0-9]+:([0-9]+):[0-9]+\"" "\\1" _VERSION_INFO_REVISION "${_VERSION_INFO_LINE}") 
-  STRING( REGEX REPLACE "SHARED_VERSION_INFO=\"[0-9]+:[0-9]+:([0-9]+)\"" "\\1" _VERSION_INFO_AGE "${_VERSION_INFO_LINE}") 
+  STRING( REGEX REPLACE "SHARED_VERSION_INFO=\"([0-9]+):[0-9]+:[0-9]+\"" "\\1" _VERSION_INFO_CURRENT "${_VERSION_INFO_LINE}")
+  STRING( REGEX REPLACE "SHARED_VERSION_INFO=\"[0-9]+:([0-9]+):[0-9]+\"" "\\1" _VERSION_INFO_REVISION "${_VERSION_INFO_LINE}")
+  STRING( REGEX REPLACE "SHARED_VERSION_INFO=\"[0-9]+:[0-9]+:([0-9]+)\"" "\\1" _VERSION_INFO_AGE "${_VERSION_INFO_LINE}")
   MATH(EXPR _INFO_SOVERSION "${_VERSION_INFO_CURRENT} - ${_VERSION_INFO_AGE} ")
   SET(_INFO_VERSION "${_INFO_SOVERSION}.${_VERSION_INFO_AGE}.${_VERSION_INFO_REVISION}")
-  SET_TARGET_PROPERTIES(nlopt PROPERTIES SOVERSION ${_INFO_SOVERSION})
-  SET_TARGET_PROPERTIES(nlopt PROPERTIES VERSION ${_INFO_VERSION} )
+  SET_TARGET_PROPERTIES(feelpp_nlopt PROPERTIES SOVERSION ${_INFO_SOVERSION})
+  SET_TARGET_PROPERTIES(feelpp_nlopt PROPERTIES VERSION ${_INFO_VERSION} )
   IF (WIN32)
-    SET_TARGET_PROPERTIES(nlopt PROPERTIES SUFFIX -${_INFO_SOVERSION}.dll)
+    SET_TARGET_PROPERTIES(feelpp_nlopt PROPERTIES SUFFIX -${_INFO_SOVERSION}.dll)
   ENDIF ()
 ENDIF ()
 
-INSTALL ( TARGETS nlopt
+INSTALL ( TARGETS feelpp_nlopt
           RUNTIME DESTINATION bin
           LIBRARY DESTINATION lib${LIB_SUFFIX}
           ARCHIVE DESTINATION lib${LIB_SUFFIX}
         )
-
-
-    
