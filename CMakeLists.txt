@@ -80,8 +80,10 @@ ELSE(${NLOPT_AUTOMAKE_LINE_VERSION} MATCHES ".*[0-9]+\\.[0-9]+\\.[0-9]+")
 ENDIF(${NLOPT_AUTOMAKE_LINE_VERSION} MATCHES ".*[0-9]+\\.[0-9]+\\.[0-9]+")
 
 MESSAGE(STATUS "NLOPT: Version number ${NLOPT_MAJOR_VERSION}.${NLOPT_MINOR_VERSION}.${NLOPT_BUGFIX_VERSION} found in configure.ac" )
+add_definitions(-DNLOPT_MAJOR_VERSION=${NLOPT_MAJOR_VERSION} -DNLOPT_MINOR_VERSION=${NLOPT_MINOR_VERSION} -DNLOPT_BUGFIX_VERSION=${NLOPT_BUGFIX_VERSION})
 
-
+# this is needed by some nlopt files
+add_definitions(-DTHREADLOCAL=)
 #==============================================================================
 # CREATE config.h
 #==============================================================================
@@ -144,7 +146,14 @@ SET ( NLOPT_SOURCES
 	util/mt19937ar.c util/sobolseq.c util/soboldata.h util/timer.c util/stop.c util/nlopt-util.h util/redblack.c util/redblack.h util/qsort_r.c util/rescale.c
 	stogo/global.cc stogo/linalg.cc stogo/local.cc stogo/stogo.cc stogo/tools.cc stogo/global.h stogo/linalg.h stogo/local.h stogo/stogo_config.h stogo/stogo.h stogo/tools.h
         )
-
+foreach(file ${NLOPT_SOURCES})
+  get_filename_component( FILE_EXT ${file} EXT )
+  #message(STATUS "extension ${file} : ${FILE_EXT}")
+  if ( ${FILE_EXT} STREQUAL ".c" )
+    message(STATUS "set ${file} as c++")
+    set_source_files_properties(${file} PROPERTIES LANGUAGE CXX)
+  endif()
+endforeach()
 OPTION(BUILD_SHARED_LIBS "Build NLOPT as a shared library" OFF )
 
 IF(BUILD_SHARED_LIBS)
