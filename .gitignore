@@ -54,3 +54,7 @@ depcomp
 missing
 py-compile
 compile
+/nlopt-autoreconf
+/nlopt-autoreconf-errors
+/nlopt-touch
+/nlopt-touch-errors
