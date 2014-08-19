@@ -7,17 +7,17 @@
  * distribute, sublicense, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be
  * included in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
  * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
  * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
- * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 #include <stdio.h>
@@ -43,17 +43,26 @@ void NLOPT_STDCALL nlopt_destroy(nlopt_opt opt)
 		    munge(opt->h[i].f_data);
 	  }
 	  for (i = 0; i < opt->m; ++i)
-	       free(opt->fc[i].tol);
+          free(opt->fc[i].tol);
 	  for (i = 0; i < opt->p; ++i)
 	       free(opt->h[i].tol);
 	  free(opt->lb); free(opt->ub);
 	  free(opt->xtol_abs);
+#ifndef __cplusplus
 	  free(opt->fc);
 	  free(opt->h);
+#else
+      delete[] opt->fc;
+      delete[] opt->h;
+#endif
 	  nlopt_destroy(opt->local_opt);
 	  free(opt->dx);
 	  free(opt->work);
+#ifndef __cplusplus
 	  free(opt);
+#else
+      delete opt;
+#endif
      }
 }
 
@@ -64,11 +73,19 @@ nlopt_opt NLOPT_STDCALL nlopt_create(nlopt_algorithm algorithm, unsigned n)
      if (((int) algorithm) < 0 || algorithm >= NLOPT_NUM_ALGORITHMS)
 	  return NULL;
 
+#ifndef __cplusplus
      opt = (nlopt_opt) malloc(sizeof(struct nlopt_opt_s));
+#else
+     opt = new nlopt_opt_s;
+#endif
      if (opt) {
 	  opt->algorithm = algorithm;
 	  opt->n = n;
+#ifndef __cplusplus
 	  opt->f = NULL; opt->f_data = NULL; opt->pre = NULL;
+#else
+      opt->f_data = NULL;
+#endif
 	  opt->maximize = 0;
 	  opt->munge_on_destroy = opt->munge_on_copy = NULL;
 
@@ -139,7 +156,7 @@ nlopt_opt NLOPT_STDCALL nlopt_copy(const nlopt_opt opt)
 	       if (!opt->ub) goto oom;
 	       nopt->xtol_abs = (double *) malloc(sizeof(double) * (opt->n));
 	       if (!opt->xtol_abs) goto oom;
-	       
+
 	       memcpy(nopt->lb, opt->lb, sizeof(double) * (opt->n));
 	       memcpy(nopt->ub, opt->ub, sizeof(double) * (opt->n));
 	       memcpy(nopt->xtol_abs, opt->xtol_abs, sizeof(double) * (opt->n));
@@ -147,8 +164,11 @@ nlopt_opt NLOPT_STDCALL nlopt_copy(const nlopt_opt opt)
 
 	  if (opt->m) {
 	       nopt->m_alloc = opt->m;
-	       nopt->fc = (nlopt_constraint *) malloc(sizeof(nlopt_constraint)
-						      * (opt->m));
+#ifndef __cplusplus
+	       nopt->fc = (nlopt_constraint *) malloc(sizeof(nlopt_constraint)* (opt->m));
+#else
+	       nopt->fc = new nlopt_constraint[opt->m];
+#endif
 	       if (!nopt->fc) goto oom;
 	       memcpy(nopt->fc, opt->fc, sizeof(nlopt_constraint) * (opt->m));
 	       for (i = 0; i < opt->m; ++i) nopt->fc[i].tol = NULL;
@@ -170,8 +190,11 @@ nlopt_opt NLOPT_STDCALL nlopt_copy(const nlopt_opt opt)
 
 	  if (opt->p) {
 	       nopt->p_alloc = opt->p;
-	       nopt->h = (nlopt_constraint *) malloc(sizeof(nlopt_constraint)
-						     * (opt->p));
+#ifndef __cplusplus
+	       nopt->h = (nlopt_constraint *) malloc(sizeof(nlopt_constraint)* (opt->p));
+#else
+           nopt->h = new nlopt_constraint[opt->p];
+#endif
 	       if (!nopt->h) goto oom;
 	       memcpy(nopt->h, opt->h, sizeof(nlopt_constraint) * (opt->p));
 	       for (i = 0; i < opt->p; ++i) nopt->h[i].tol = NULL;
@@ -213,19 +236,19 @@ oom:
 /*************************************************************************/
 
 nlopt_result NLOPT_STDCALL nlopt_set_precond_min_objective(nlopt_opt opt,
-							   nlopt_func f, 
-							   nlopt_precond pre,
-							   void *f_data)
+                                                           nlopt_func f,
+                                                           nlopt_precond pre,
+                                                           void *f_data)
 {
-     if (opt) {
-	  if (opt->munge_on_destroy) opt->munge_on_destroy(opt->f_data);
-	  opt->f = f; opt->f_data = f_data; opt->pre = pre;
-	  opt->maximize = 0;
-	  if (nlopt_isinf(opt->stopval) && opt->stopval > 0)
-	       opt->stopval = -HUGE_VAL; /* switch default from max to min */
-	  return NLOPT_SUCCESS;
-     }
-     return NLOPT_INVALID_ARGS;
+    if (opt) {
+        if (opt->munge_on_destroy) opt->munge_on_destroy(opt->f_data);
+        opt->f=f;opt->f_data = f_data;opt->pre = pre;
+        opt->maximize = 0;
+        if (nlopt_isinf(opt->stopval) && opt->stopval > 0)
+            opt->stopval = -HUGE_VAL; /* switch default from max to min */
+        return NLOPT_SUCCESS;
+    }
+    return NLOPT_INVALID_ARGS;
 }
 
 nlopt_result NLOPT_STDCALL nlopt_set_min_objective(nlopt_opt opt,
@@ -234,8 +257,8 @@ nlopt_result NLOPT_STDCALL nlopt_set_min_objective(nlopt_opt opt,
      return nlopt_set_precond_min_objective(opt, f, NULL, f_data);
 }
 
-nlopt_result NLOPT_STDCALL nlopt_set_precond_max_objective(nlopt_opt opt, 
-							   nlopt_func f, 
+nlopt_result NLOPT_STDCALL nlopt_set_precond_max_objective(nlopt_opt opt,
+							   nlopt_func f,
 							   nlopt_precond pre,
 							   void *f_data)
 {
@@ -361,9 +384,9 @@ static nlopt_result add_constraint(unsigned *m, unsigned *m_alloc,
 
      if ((fc && mfc) || (fc && fm != 1) || (!fc && !mfc))
 	  return NLOPT_INVALID_ARGS;
-     if (tol) 
+     if (tol)
 	  for (i = 0; i < fm; ++i) if (tol[i] < 0) return NLOPT_INVALID_ARGS;
-     
+
      tolcopy = (double *) malloc(sizeof(double) * fm);
      if (fm && !tolcopy) return NLOPT_OUT_OF_MEMORY;
      if (tol)
@@ -373,19 +396,23 @@ static nlopt_result add_constraint(unsigned *m, unsigned *m_alloc,
 
      *m += 1;
      if (*m > *m_alloc) {
-	  /* allocate by repeated doubling so that 
+	  /* allocate by repeated doubling so that
 	     we end up with O(log m) mallocs rather than O(m). */
 	  *m_alloc = 2 * (*m);
+#ifndef __cplusplus
 	  *c = (nlopt_constraint *) realloc(*c,
 					    sizeof(nlopt_constraint)
 					    * (*m_alloc));
+#else
+      *c = new nlopt_constraint[*m_alloc];
+#endif
 	  if (!*c) {
 	       *m_alloc = *m = 0;
 	       free(tolcopy);
 	       return NLOPT_OUT_OF_MEMORY;
 	  }
      }
-     
+
      (*c)[*m - 1].m = fm;
      (*c)[*m - 1].f = fc;
      (*c)[*m - 1].pre = pre;
@@ -397,10 +424,10 @@ static nlopt_result add_constraint(unsigned *m, unsigned *m_alloc,
 
 static int inequality_ok(nlopt_algorithm algorithm) {
      /* nonlinear constraints are only supported with some algorithms */
-     return (algorithm == NLOPT_LD_MMA || algorithm == NLOPT_LD_CCSAQ 
+     return (algorithm == NLOPT_LD_MMA || algorithm == NLOPT_LD_CCSAQ
 	     || algorithm == NLOPT_LD_SLSQP
 	     || algorithm == NLOPT_LN_COBYLA
-	     || AUGLAG_ALG(algorithm) 
+	     || AUGLAG_ALG(algorithm)
 	     || algorithm == NLOPT_GN_ISRES
 	     || algorithm == NLOPT_GN_ORIG_DIRECT
 	     || algorithm == NLOPT_GN_ORIG_DIRECT_L);
@@ -426,7 +453,7 @@ NLOPT_STDCALL nlopt_add_inequality_mconstraint(nlopt_opt opt, unsigned m,
 
 nlopt_result
 NLOPT_STDCALL nlopt_add_precond_inequality_constraint(nlopt_opt opt,
-						      nlopt_func fc, 
+						      nlopt_func fc,
 						      nlopt_precond pre,
 						      void *fc_data,
 						      double tol)
@@ -469,7 +496,7 @@ NLOPT_STDCALL nlopt_remove_equality_constraints(nlopt_opt opt)
 
 static int equality_ok(nlopt_algorithm algorithm) {
      /* equality constraints (h(x) = 0) only via some algorithms */
-     return (AUGLAG_ALG(algorithm) 
+     return (AUGLAG_ALG(algorithm)
 	     || algorithm == NLOPT_LD_SLSQP
 	     || algorithm == NLOPT_GN_ISRES
 	     || algorithm == NLOPT_LN_COBYLA);
@@ -486,7 +513,7 @@ NLOPT_STDCALL nlopt_add_equality_mconstraint(nlopt_opt opt, unsigned m,
 	  return NLOPT_SUCCESS;
      }
      if (!opt || !equality_ok(opt->algorithm)
-	 || nlopt_count_constraints(opt->p, opt->h) + m > opt->n) 
+	 || nlopt_count_constraints(opt->p, opt->h) + m > opt->n)
 	  ret = NLOPT_INVALID_ARGS;
      else ret = add_constraint(&opt->p, &opt->p_alloc, &opt->h,
 			       m, NULL, fc, NULL, fc_data, tol);
@@ -595,8 +622,8 @@ NLOPT_STDCALL nlopt_set_force_stop(nlopt_opt opt, int force_stop)
 }
 
 GET(force_stop, int, force_stop)
-nlopt_result NLOPT_STDCALL nlopt_force_stop(nlopt_opt opt) { 
-     return nlopt_set_force_stop(opt, 1); 
+nlopt_result NLOPT_STDCALL nlopt_force_stop(nlopt_opt opt) {
+     return nlopt_set_force_stop(opt, 1);
 }
 
 /*************************************************************************/
@@ -665,7 +692,7 @@ NLOPT_STDCALL nlopt_set_initial_step(nlopt_opt opt, const double *dx)
 }
 
 nlopt_result
-NLOPT_STDCALL nlopt_get_initial_step(const nlopt_opt opt, const double *x, 
+NLOPT_STDCALL nlopt_get_initial_step(const nlopt_opt opt, const double *x,
 				     double *dx)
 {
      if (!opt) return NLOPT_INVALID_ARGS;
@@ -701,18 +728,18 @@ NLOPT_STDCALL nlopt_set_default_initial_step(nlopt_opt opt, const double *x)
 	  if (!nlopt_isinf(ub[i]) && !nlopt_isinf(lb[i])
 	      && (ub[i] - lb[i]) * 0.25 < step && ub[i] > lb[i])
 	       step = (ub[i] - lb[i]) * 0.25;
-	  if (!nlopt_isinf(ub[i]) 
+	  if (!nlopt_isinf(ub[i])
 	      && ub[i] - x[i] < step && ub[i] > x[i])
 	       step = (ub[i] - x[i]) * 0.75;
-	  if (!nlopt_isinf(lb[i]) 
+	  if (!nlopt_isinf(lb[i])
 	      && x[i] - lb[i] < step && x[i] > lb[i])
 	       step = (x[i] - lb[i]) * 0.75;
 
 	  if (nlopt_isinf(step)) {
-	       if (!nlopt_isinf(ub[i]) 
+	       if (!nlopt_isinf(ub[i])
 		   && fabs(ub[i] - x[i]) < fabs(step))
 		    step = (ub[i] - x[i]) * 1.1;
-	       if (!nlopt_isinf(lb[i]) 
+	       if (!nlopt_isinf(lb[i])
 		   && fabs(x[i] - lb[i]) < fabs(step))
 		    step = (x[i] - lb[i]) * 1.1;
 	  }
@@ -721,7 +748,7 @@ NLOPT_STDCALL nlopt_set_default_initial_step(nlopt_opt opt, const double *x)
 	  }
 	  if (nlopt_isinf(step) || step == 0)
 	       step = 1;
-	  
+
 	  opt->dx[i] = step;
      }
      return NLOPT_SUCCESS;
