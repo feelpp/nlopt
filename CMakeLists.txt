@@ -123,7 +123,7 @@ INCLUDE_DIRECTORIES (
 #==============================================================================
 
 SET ( NLOPT_HEADERS
-  api/nlopt.h api/nlopt.hpp api/nlopt.f
+  api/nlopt.h api/nlopt.hpp # api/nlopt.f
 )
 
 SET ( NLOPT_SOURCES
