@@ -154,7 +154,7 @@ foreach(file ${NLOPT_SOURCES})
     set_source_files_properties(${file} PROPERTIES LANGUAGE CXX)
   endif()
 endforeach()
-OPTION(BUILD_SHARED_LIBS "Build NLOPT as a shared library" OFF )
+#OPTION(BUILD_SHARED_LIBS "Build NLOPT as a shared library" OFF )
 
 IF(BUILD_SHARED_LIBS)
   ADD_DEFINITIONS(-DNLOPT_DLL)
