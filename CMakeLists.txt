@@ -123,7 +123,7 @@ INCLUDE_DIRECTORIES (
 #==============================================================================
 
 SET ( NLOPT_HEADERS
-  api/nlopt.h api/nlopt.hpp api/nlopt.f
+  api/nlopt.h api/nlopt.hpp # api/nlopt.f
 )
 
 SET ( NLOPT_SOURCES
@@ -161,7 +161,7 @@ IF(BUILD_SHARED_LIBS)
   ADD_DEFINITIONS(-DNLOPT_DLL_EXPORT )
 ENDIF(BUILD_SHARED_LIBS)
 
-INSTALL ( FILES ${NLOPT_HEADERS} DESTINATION include )
+INSTALL ( FILES ${NLOPT_HEADERS} DESTINATION include/feel/nlopt )
 
 ADD_LIBRARY (feelpp_nlopt ${NLOPT_SOURCES} )
 
