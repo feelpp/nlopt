@@ -165,6 +165,13 @@ INSTALL ( FILES ${NLOPT_HEADERS} DESTINATION include/feel/nlopt )
 
 ADD_LIBRARY (feelpp_nlopt ${NLOPT_SOURCES} )
 
+if (NOT BUILD_SHARED_LIBS)
+	set_target_properties(feelpp_nlopt PROPERTIES OUTPUT_NAME "feelpp_nlopt")
+	# Avoid the static library vs import library conflict (necessary for
+	# m$ toolchain).
+	set_target_properties(feelpp_ginac PROPERTIES PREFIX "lib")
+endif()
+
 # parse configure.ac for lib version
 STRING( REGEX MATCH "SHARED_VERSION_INFO=\"[0-9]+:[0-9]+:[0-9]+\"" _VERSION_INFO_LINE "${CONFIG_AUTOMAKE}")
 IF (_VERSION_INFO_LINE)
