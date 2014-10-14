@@ -170,6 +170,8 @@ if (NOT BUILD_SHARED_LIBS)
 	# Avoid the static library vs import library conflict (necessary for
 	# m$ toolchain).
 	set_target_properties(feelpp_ginac PROPERTIES PREFIX "lib")
+else()
+  set_property(TARGET feelpp_nlopt PROPERTY MACOSX_RPATH ON)
 endif()
 
 # parse configure.ac for lib version
