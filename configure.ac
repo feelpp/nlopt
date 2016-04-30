@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(nlopt, 2.4.2, stevenj@alum.mit.edu)
+AC_INIT(nlopt, 2.5, stevenj@alum.mit.edu)
 AC_CONFIG_SRCDIR(api/nlopt.h)
-SHARED_VERSION_INFO="8:2:8" # CURRENT:REVISION:AGE
+SHARED_VERSION_INFO="9:0:9" # CURRENT:REVISION:AGE
 
 AM_INIT_AUTOMAKE(1.7)
 AM_CONFIG_HEADER(config.h)
@@ -83,6 +83,14 @@ AC_TRY_LINK([#include <math.h>
 ], [if (!isinf(3.14159)) isinf(2.7183);], ok=yes, ok=no)
 if test "$ok" = "yes"; then
 	AC_DEFINE(HAVE_ISINF,1,[Define if the isinf() function/macro is available.])
+fi
+AC_MSG_RESULT(${ok})
+
+AC_MSG_CHECKING([for fpclassify])
+AC_TRY_LINK([#include <math.h>
+], [if (!fpclassify(3.14159)) fpclassify(2.7183);], ok=yes, ok=no)
+if test "$ok" = "yes"; then
+	AC_DEFINE(HAVE_FPCLASSIFY,1,[Define if the fpclassify() function/macro is available.])
 fi
 AC_MSG_RESULT(${ok})
 
@@ -173,6 +181,7 @@ if test $have_python = yes; then
   fi
   AC_MSG_RESULT([${pinc:-unknown}])
   PYTHON_INCLUDES="$pinc"
+  PYTHON_LIBS=`$PYTHON_CONFIG --libs 2>/dev/null`
   save_CPPFLAGS=$CPPFLAGS
   CPPFLAGS="$CPPFLAGS $PYTHON_INCLUDES"
   AC_CHECK_HEADER([Python.h], [], [AC_MSG_WARN([disabling Python wrappers]) 
@@ -198,6 +207,7 @@ AC_SUBST(GUILE_INSTALL_DIR)
 AC_SUBST(GUILE_CPPFLAGS)
 AC_SUBST(GUILE_LIBS)
 AC_SUBST(PYTHON_INCLUDES)
+AC_SUBST(PYTHON_LIBS)
 AM_CONDITIONAL(WITH_GUILE, test x"$GUILE_CONFIG" != "xunknown")
 AM_CONDITIONAL(WITH_PYTHON, test x"$have_python" = "xyes")
 
