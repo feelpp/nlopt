@@ -26,6 +26,9 @@
 #include <string.h>
 #include <float.h>
 #include <stdarg.h>
+#ifdef __cplusplus
+#include<iostream>
+#endif
 
 #include "nlopt-internal.h"
 
@@ -51,8 +54,13 @@ void NLOPT_STDCALL nlopt_destroy(nlopt_opt opt)
 	       free(opt->h[i].tol);
 	  free(opt->lb); free(opt->ub);
 	  free(opt->xtol_abs);
-	  free(opt->fc);
-	  free(opt->h);
+#ifndef __cplusplus
+      free(opt->fc);
+  	  free(opt->h);
+#else
+      delete[] opt->fc;
+      delete[] opt->h;
+#endif
 	  nlopt_destroy(opt->local_opt);
 	  free(opt->dx);
 	  free(opt->work);
