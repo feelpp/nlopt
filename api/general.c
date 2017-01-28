@@ -26,9 +26,9 @@
 
 void NLOPT_STDCALL nlopt_version(int *major, int *minor, int *bugfix)
 {
-     *major = NLOPT_MAJOR_VERSION;
-     *minor = NLOPT_MINOR_VERSION;
-     *bugfix = NLOPT_BUGFIX_VERSION;
+     *major = MAJOR_VERSION;
+     *minor = MINOR_VERSION;
+     *bugfix = BUGFIX_VERSION;
 }
 
 /*************************************************************************/
