@@ -234,7 +234,7 @@ endif ()
 
 install (FILES ${NLOPT_HEADERS} DESTINATION ${INSTALL_INCLUDE_DIR})
 
-set (nlopt_lib nlopt${NLOPT_SUFFIX})
+set (nlopt_lib feelpp_nlopt${NLOPT_SUFFIX})
 add_library (${nlopt_lib} ${NLOPT_SOURCES})
 target_link_libraries (${nlopt_lib} ${M_LIBRARY})
 
