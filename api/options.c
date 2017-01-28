@@ -114,11 +114,11 @@ nlopt_opt NLOPT_STDCALL nlopt_create(nlopt_algorithm algorithm, unsigned n)
 	  opt->errmsg = NULL;
 
 	  if (n > 0) {
-	       opt->lb = (double *) malloc(sizeof(double) * (n));
+	       opt->lb = (double *) calloc(n, sizeof(double));
 	       if (!opt->lb) goto oom;
-	       opt->ub = (double *) malloc(sizeof(double) * (n));
+	       opt->ub = (double *) calloc(n, sizeof(double));
 	       if (!opt->ub) goto oom;
-	       opt->xtol_abs = (double *) malloc(sizeof(double) * (n));
+	       opt->xtol_abs = (double *) calloc(n, sizeof(double));
 	       if (!opt->xtol_abs) goto oom;
 	       nlopt_set_lower_bounds1(opt, -HUGE_VAL);
 	       nlopt_set_upper_bounds1(opt, +HUGE_VAL);
@@ -233,7 +233,7 @@ nlopt_opt NLOPT_STDCALL nlopt_copy(const nlopt_opt opt)
      return nopt;
 
 oom:
-     nopt->munge_on_destroy = NULL; // better to leak mem than crash
+     nopt->munge_on_destroy = NULL; /* better to leak mem than crash */
      nlopt_destroy(nopt);
      return NULL;
 }
@@ -293,7 +293,7 @@ NLOPT_STDCALL nlopt_set_lower_bounds(nlopt_opt opt, const double *lb)
 {
      nlopt_unset_errmsg(opt);
      if (opt && (opt->n == 0 || lb)) {
-          int i;
+	  unsigned int i;
 	  memcpy(opt->lb, lb, sizeof(double) * (opt->n));
 	  for (i = 0; i < opt->n; ++i)
               if (opt->lb[i] < opt->ub[i] && nlopt_istiny(opt->ub[i] - opt->lb[i]))
@@ -335,7 +335,7 @@ NLOPT_STDCALL nlopt_set_upper_bounds(nlopt_opt opt, const double *ub)
 {
      nlopt_unset_errmsg(opt);
      if (opt && (opt->n == 0 || ub)) {
-          int i;
+	  unsigned int i;
 	  memcpy(opt->ub, ub, sizeof(double) * (opt->n));
 	  for (i = 0; i < opt->n; ++i)
               if (opt->lb[i] < opt->ub[i] && nlopt_istiny(opt->ub[i] - opt->lb[i]))
