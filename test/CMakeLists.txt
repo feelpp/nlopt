@@ -1,9 +1,9 @@
-add_custom_target (tests)
+add_custom_target (nlopt_tests)
 
 # have to add timer.c and mt19937ar.c as symbols are declared extern
 add_executable (nlopt_testopt testfuncs.c testfuncs.h testopt.cpp ${PROJECT_SOURCE_DIR}/util/timer.c ${PROJECT_SOURCE_DIR}/util/mt19937ar.c)
 target_link_libraries (nlopt_testopt ${nlopt_lib})
-add_dependencies (tests nlopt_testopt)
+add_dependencies (nlopt_tests nlopt_testopt)
 
 foreach (algo_index RANGE 29)# 42
   foreach (obj_index RANGE 1)# 21
