@@ -198,11 +198,11 @@ include_directories (
 # nlopt LIBRARY TARGET (SHARED OR STATIC)
 #==============================================================================
 
-set (NLOPT_HEADERS 
+set (NLOPT_HEADERS
   api/nlopt.h ${PROJECT_BINARY_DIR}/api/nlopt.hpp ${PROJECT_BINARY_DIR}/api/nlopt.f
 )
 
-set (NLOPT_SOURCES   
+set (NLOPT_SOURCES
   direct/DIRect.c direct/direct_wrap.c direct/DIRserial.c direct/DIRsubrout.c direct/direct-internal.h direct/direct.h
   cdirect/cdirect.c cdirect/hybrid.c cdirect/cdirect.h
   praxis/praxis.c praxis/praxis.h
@@ -212,7 +212,7 @@ set (NLOPT_SOURCES
   mma/mma.c mma/mma.h mma/ccsa_quadratic.c
   cobyla/cobyla.c cobyla/cobyla.h
   newuoa/newuoa.c newuoa/newuoa.h
-  neldermead/nldrmd.c neldermead/neldermead.h neldermead/sbplx.c 
+  neldermead/nldrmd.c neldermead/neldermead.h neldermead/sbplx.c
   auglag/auglag.c auglag/auglag.h
   bobyqa/bobyqa.c bobyqa/bobyqa.h
   isres/isres.c isres/isres.h
@@ -270,7 +270,7 @@ if (NOT DEFINED INSTALL_PYTHON_DIR AND PYTHONINTERP_FOUND)
                     OUTPUT_VARIABLE _ABS_PYTHON_MODULE_PATH
                     OUTPUT_STRIP_TRAILING_WHITESPACE )
 
-  get_filename_component (_ABS_PYTHON_MODULE_PATH ${_ABS_PYTHON_MODULE_PATH} ABSOLUTE)
+  get_filename_component (_ABS_PYTHON_MODULE_PATH ${_ABS_PYTHON_MODULE_PATH} PATH ABSOLUTE)
   file (RELATIVE_PATH _REL_PYTHON_MODULE_PATH ${CMAKE_INSTALL_PREFIX} ${_ABS_PYTHON_MODULE_PATH})
 
   set (INSTALL_PYTHON_DIR ${_REL_PYTHON_MODULE_PATH})
@@ -343,5 +343,3 @@ install (FILES
           ${CMAKE_CURRENT_BINARY_DIR}/NLoptConfigVersion.cmake
          DESTINATION ${RELATIVE_INSTALL_CMAKE_DIR}
          COMPONENT Development)
-
-
