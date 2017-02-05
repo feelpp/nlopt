@@ -296,7 +296,7 @@ if (BUILD_MATLAB)
 endif ()
 
 if (OCTAVE_FOUND OR Matlab_FOUND)
-  add_subdirectory (octave)
+#  add_subdirectory (octave)
 endif ()
 
 enable_testing ()
