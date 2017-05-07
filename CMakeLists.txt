@@ -20,7 +20,7 @@ endif ()
 
 project (nlopt)
 
-list (APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+list (APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 option (WITH_CXX "enable cxx routines" OFF)
 option (BUILD_SHARED_LIBS "Build NLopt as a shared library" ON)
@@ -40,10 +40,10 @@ include (GNUInstallDirs)
 # Offer the user the choice of overriding the installation directories
 set (INSTALL_LIB_DIR     ${CMAKE_INSTALL_LIBDIR}        CACHE PATH "Installation directory for libraries")
 set (INSTALL_BIN_DIR     ${CMAKE_INSTALL_BINDIR}        CACHE PATH "Installation directory for executables")
-set (INSTALL_INCLUDE_DIR ${CMAKE_INSTALL_INCLUDEDIR}    CACHE PATH "Installation directory for header files")
-set (INSTALL_DATA_DIR    ${CMAKE_INSTALL_DATADIR}/nlopt CACHE PATH "Installation directory for data files")
-set (INSTALL_MAN_DIR     ${CMAKE_INSTALL_MANDIR}        CACHE PATH "Installation directory for man documentation")
-set (INSTALL_CMAKE_DIR   ${INSTALL_LIB_DIR}/cmake/nlopt CACHE PATH "Installation directory for cmake config files")
+set (INSTALL_INCLUDE_DIR ${CMAKE_INSTALL_INCLUDEDIR}/feelpp/nlopt    CACHE PATH "Installation directory for header files")
+set (INSTALL_DATA_DIR    ${CMAKE_INSTALL_DATADIR}/feelpp/nlopt CACHE PATH "Installation directory for data files")
+set (INSTALL_MAN_DIR     ${CMAKE_INSTALL_MANDIR}/feelpp/nlopt        CACHE PATH "Installation directory for man documentation")
+set (INSTALL_CMAKE_DIR   share/feelpp/nlopt/cmake CACHE PATH "Installation directory for cmake config files")
 
 # Make relative paths absolute (needed later on)
 foreach (p LIB BIN INCLUDE DATA CMAKE)
@@ -164,7 +164,7 @@ configure_file (${CMAKE_CURRENT_SOURCE_DIR}/nlopt_config.h.in ${CMAKE_CURRENT_BI
 # pkgconfig file
 if (UNIX OR MINGW)
   configure_file (${CMAKE_CURRENT_SOURCE_DIR}/nlopt.pc.in ${CMAKE_CURRENT_BINARY_DIR}/nlopt.pc @ONLY)
-  install (FILES ${CMAKE_CURRENT_BINARY_DIR}/nlopt.pc DESTINATION ${RELATIVE_INSTALL_LIB_DIR}/pkgconfig)
+  install (FILES ${CMAKE_CURRENT_BINARY_DIR}/nlopt.pc DESTINATION share/feelpp/nlopt/pkgconfig)
 endif ()
 
 #==============================================================================
@@ -234,7 +234,7 @@ endif ()
 
 install (FILES ${NLOPT_HEADERS} DESTINATION ${INSTALL_INCLUDE_DIR})
 
-set (nlopt_lib nlopt${NLOPT_SUFFIX})
+set (nlopt_lib feelpp_nlopt${NLOPT_SUFFIX})
 add_library (${nlopt_lib} ${NLOPT_SOURCES})
 target_link_libraries (${nlopt_lib} ${M_LIBRARY})
 
@@ -296,7 +296,7 @@ if (BUILD_MATLAB)
 endif ()
 
 if (OCTAVE_FOUND OR Matlab_FOUND)
-  add_subdirectory (octave)
+#  add_subdirectory (octave)
 endif ()
 
 enable_testing ()
