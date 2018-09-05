@@ -43,7 +43,7 @@ set (INSTALL_BIN_DIR     ${CMAKE_INSTALL_BINDIR}        CACHE PATH "Installation
 set (INSTALL_INCLUDE_DIR ${CMAKE_INSTALL_INCLUDEDIR}/feelpp/nlopt    CACHE PATH "Installation directory for header files")
 set (INSTALL_DATA_DIR    ${CMAKE_INSTALL_DATADIR}/feelpp/nlopt CACHE PATH "Installation directory for data files")
 set (INSTALL_MAN_DIR     ${CMAKE_INSTALL_MANDIR}/feelpp/nlopt        CACHE PATH "Installation directory for man documentation")
-set (INSTALL_CMAKE_DIR   share/feelpp/nlopt/cmake CACHE PATH "Installation directory for cmake config files")
+set (INSTALL_CMAKE_DIR   ${CMAKE_INSTALL_DATADIR}/feelpp/nlopt CACHE PATH "Installation directory for cmake config files")
 
 # Make relative paths absolute (needed later on)
 foreach (p LIB BIN INCLUDE DATA CMAKE)
@@ -237,7 +237,11 @@ install (FILES ${NLOPT_HEADERS} DESTINATION ${INSTALL_INCLUDE_DIR})
 set (nlopt_lib feelpp_nlopt${NLOPT_SUFFIX})
 add_library (${nlopt_lib} ${NLOPT_SOURCES})
 target_link_libraries (${nlopt_lib} ${M_LIBRARY})
-
+target_include_directories(feelpp_nlopt INTERFACE
+      $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/api>
+      $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/api>
+      $<INSTALL_INTERFACE:include/feelpp/>
+      )
 set_target_properties (${nlopt_lib} PROPERTIES SOVERSION 0)
 set_target_properties (${nlopt_lib} PROPERTIES VERSION 0.9.0)
 
