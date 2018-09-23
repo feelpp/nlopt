@@ -326,7 +326,7 @@ export (TARGETS ${nlopt_lib} FILE ${PROJECT_BINARY_DIR}/NLoptLibraryDepends.cmak
 
 # Install the export set for use with the install-tree
 install(EXPORT NLoptLibraryDepends
-        DESTINATION ${RELATIVE_INSTALL_CMAKE_DIR}
+        DESTINATION ${RELATIVE_INSTALL_CMAKE_DIR}/cmake
         COMPONENT Development)
 
 # Create a NLOPTConfig.cmake file for the use from the install tree
@@ -345,5 +345,5 @@ configure_file (cmake/NLoptConfigVersion.cmake.in NLoptConfigVersion.cmake @ONLY
 install (FILES
           ${CMAKE_CURRENT_BINARY_DIR}/NLoptConfig.cmake
           ${CMAKE_CURRENT_BINARY_DIR}/NLoptConfigVersion.cmake
-         DESTINATION ${RELATIVE_INSTALL_CMAKE_DIR}
+         DESTINATION ${RELATIVE_INSTALL_CMAKE_DIR}/cmake
          COMPONENT Development)
