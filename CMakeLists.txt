@@ -1,18 +1,18 @@
 #==============================================================================
 # NLOPT CMake file
-# 
-# NLopt is a free/open-source library for nonlinear optimization, providing 
-# a common interface for a number of different free optimization routines 
-# available online as well as original implementations of various other 
+#
+# NLopt is a free/open-source library for nonlinear optimization, providing
+# a common interface for a number of different free optimization routines
+# available online as well as original implementations of various other
 # algorithms
-# WEBSITE: http://ab-initio.mit.edu/wiki/index.php/NLopt 
+# WEBSITE: http://ab-initio.mit.edu/wiki/index.php/NLopt
 # AUTHOR: Steven G. Johnson
 #
 # This CMakeLists.txt file was created to compile NLOPT with the CMAKE utility.
 # Benoit Scherrer, 2010 CRL, Harvard Medical School
-# Copyright (c) 2008-2009 Children's Hospital Boston 
+# Copyright (c) 2008-2009 Children's Hospital Boston
 #==============================================================================
-cmake_minimum_required (VERSION 2.8.5)
+cmake_minimum_required (VERSION 2.8.11)
 
 if (NOT DEFINED CMAKE_BUILD_TYPE)
   set (CMAKE_BUILD_TYPE Release CACHE STRING "Build type")
@@ -20,19 +20,35 @@ endif ()
 
 project (nlopt)
 
+#==============================================================================
+# version
+set (NLOPT_MAJOR_VERSION "2")
+set (NLOPT_MINOR_VERSION "5")
+set (NLOPT_BUGFIX_VERSION "0")
+set (NLOPT_VERSION_STRING ${NLOPT_MAJOR_VERSION}.${NLOPT_MINOR_VERSION}.${NLOPT_BUGFIX_VERSION})
+message (STATUS "NLopt version ${NLOPT_VERSION_STRING}")
+
+# This is the ABI version number, which differes from the API version above
+# (it indicates ABI compatibility), but they are typically incremented together.
+set(SO_MAJOR 0)
+set(SO_MINOR 9)
+set(SO_PATCH 0)
+#==============================================================================
+
 list (APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
-option (WITH_CXX "enable cxx routines" OFF)
+option (NLOPT_CXX "enable cxx routines" ON)
 option (BUILD_SHARED_LIBS "Build NLopt as a shared library" ON)
-option (BUILD_PYTHON "build python bindings" ON)
-option (BUILD_OCTAVE "build octave bindings" ON)
-option (BUILD_MATLAB "build matlab bindings" ON)
-option (BUILD_GUILE "build guile bindings" ON)
-option (USE_SWIG "use SWIG to build bindings" ON)
+option (NLOPT_PYTHON "build python bindings" ON)
+option (NLOPT_OCTAVE "build octave bindings" ON)
+option (NLOPT_MATLAB "build matlab bindings" ON)
+option (NLOPT_GUILE "build guile bindings" ON)
+option (NLOPT_SWIG "use SWIG to build bindings" ON)
 
-set (NLOPT_SUFFIX)
-if (WITH_CXX)
-  set (NLOPT_SUFFIX _cxx)
+if (CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
+  option (NLOPT_TESTS "build unit tests" ON)
+else ()
+  option (NLOPT_TESTS "build unit tests" OFF)
 endif ()
 
 include (GNUInstallDirs)
@@ -121,7 +137,7 @@ if (NOT DEFINED HAVE_FPCLASSIFY)
 endif ()
 
 option (WITH_THREADLOCAL "check thread local keyword" ON)
-if (WITH_THREADLOCAL AND NOT DEFINED HAVE_THREAD_LOCAL_STORAGE)
+if (WITH_THREADLOCAL AND NOT DEFINED THREADLOCAL)
   foreach (_THREADLOCAL_KEY "__thread" "__declspec(thread)")
     unset (HAVE_THREAD_LOCAL_STORAGE CACHE)
     check_c_source_compiles("
@@ -130,30 +146,27 @@ if (WITH_THREADLOCAL AND NOT DEFINED HAVE_THREAD_LOCAL_STORAGE)
     int main(void) {
         return 0;
     }" HAVE_THREAD_LOCAL_STORAGE)
-    if (${HAVE_THREAD_LOCAL_STORAGE})
-      set (THREADLOCAL ${_THREADLOCAL_KEY})
+    if (HAVE_THREAD_LOCAL_STORAGE)
+      set (THREADLOCAL ${_THREADLOCAL_KEY} CACHE STRING "Thread local keyword")
     endif ()
   endforeach()
 endif ()
 
-if (WITH_CXX OR BUILD_PYTHON OR BUILD_GUILE OR BUILD_OCTAVE)
-  check_cxx_symbol_exists (_LIBCPP_VERSION string SYSTEM_HAS_LIBCPP)
-  if (SYSTEM_HAS_LIBCPP)
+
+if (NLOPT_CXX OR NLOPT_PYTHON OR NLOPT_GUILE OR NLOPT_OCTAVE)
+  check_cxx_symbol_exists (__cplusplus ciso646 SYSTEM_HAS_CXX)
+  if (SYSTEM_HAS_CXX)
     check_cxx_compiler_flag ("-std=c++11" SUPPORTS_STDCXX11)
     if (SUPPORTS_STDCXX11)
       set (CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
+      if (NLOPT_CXX)
+        set (NLOPT_CXX11 ON)
+      endif ()
     endif ()
+  else()
+    message (FATAL_ERROR "The compiler doesn't support CXX.")
   endif ()
 endif ()
-
-#==============================================================================
-# version
-#==============================================================================
-set (NLOPT_MAJOR_VERSION "2")
-set (NLOPT_MINOR_VERSION "5")
-set (NLOPT_BUGFIX_VERSION "0")
-set (NLOPT_VERSION_STRING ${NLOPT_MAJOR_VERSION}.${NLOPT_MINOR_VERSION}.${NLOPT_BUGFIX_VERSION})
-message (STATUS "NLopt version ${NLOPT_VERSION_STRING}")
 
 #==============================================================================
 # CREATE nlopt_config.h
@@ -168,78 +181,86 @@ if (UNIX OR MINGW)
 endif ()
 
 #==============================================================================
-# INCLUDE DIRECTORIES
-#==============================================================================
-set (${INCLUDE_DIRECTORIES} "")
-include_directories (
-  ${PROJECT_BINARY_DIR}/api
-  ${PROJECT_BINARY_DIR}
-  stogo
-  util
-  direct
-  cdirect
-  praxis
-  luksan
-  crs
-  mlsl
-  mma
-  cobyla
-  newuoa
-  neldermead
-  auglag
-  bobyqa
-  isres
-  slsqp
-  esch
-  api)
-
-
-#==============================================================================
 # nlopt LIBRARY TARGET (SHARED OR STATIC)
 #==============================================================================
 
-set (NLOPT_HEADERS 
-  api/nlopt.h ${PROJECT_BINARY_DIR}/api/nlopt.hpp ${PROJECT_BINARY_DIR}/api/nlopt.f
+configure_file (src/api/nlopt.h ${PROJECT_BINARY_DIR}/src/api/nlopt.h COPYONLY)
+
+set (NLOPT_HEADERS
+  ${PROJECT_BINARY_DIR}/src/api/nlopt.h ${PROJECT_BINARY_DIR}/src/api/nlopt.hpp ${PROJECT_BINARY_DIR}/src/api/nlopt.f
 )
 
-set (NLOPT_SOURCES   
-  direct/DIRect.c direct/direct_wrap.c direct/DIRserial.c direct/DIRsubrout.c direct/direct-internal.h direct/direct.h
-  cdirect/cdirect.c cdirect/hybrid.c cdirect/cdirect.h
-  praxis/praxis.c praxis/praxis.h
-  luksan/plis.c luksan/plip.c luksan/pnet.c luksan/mssubs.c luksan/pssubs.c luksan/luksan.h
-  crs/crs.c crs/crs.h
-  mlsl/mlsl.c mlsl/mlsl.h
-  mma/mma.c mma/mma.h mma/ccsa_quadratic.c
-  cobyla/cobyla.c cobyla/cobyla.h
-  newuoa/newuoa.c newuoa/newuoa.h
-  neldermead/nldrmd.c neldermead/neldermead.h neldermead/sbplx.c 
-  auglag/auglag.c auglag/auglag.h
-  bobyqa/bobyqa.c bobyqa/bobyqa.h
-  isres/isres.c isres/isres.h
-  slsqp/slsqp.c slsqp/slsqp.h
-  esch/esch.c esch/esch.h
-  api/general.c api/options.c api/optimize.c api/deprecated.c api/nlopt-internal.h api/nlopt.h api/f77api.c api/f77funcs.h api/f77funcs_.h api/nlopt.hpp api/nlopt-in.hpp
-  util/mt19937ar.c util/sobolseq.c util/soboldata.h util/timer.c util/stop.c util/nlopt-util.h util/redblack.c util/redblack.h util/qsort_r.c util/rescale.c
+set (NLOPT_SOURCES
+  src/algs/direct/DIRect.c src/algs/direct/direct_wrap.c src/algs/direct/DIRserial.c src/algs/direct/DIRsubrout.c src/algs/direct/direct-internal.h src/algs/direct/direct.h
+  src/algs/cdirect/cdirect.c src/algs/cdirect/hybrid.c src/algs/cdirect/cdirect.h
+  src/algs/praxis/praxis.c src/algs/praxis/praxis.h
+  src/algs/luksan/plis.c src/algs/luksan/plip.c src/algs/luksan/pnet.c src/algs/luksan/mssubs.c src/algs/luksan/pssubs.c src/algs/luksan/luksan.h
+  src/algs/crs/crs.c src/algs/crs/crs.h
+  src/algs/mlsl/mlsl.c src/algs/mlsl/mlsl.h
+  src/algs/mma/mma.c src/algs/mma/mma.h src/algs/mma/ccsa_quadratic.c
+  src/algs/cobyla/cobyla.c src/algs/cobyla/cobyla.h
+  src/algs/newuoa/newuoa.c src/algs/newuoa/newuoa.h
+  src/algs/neldermead/nldrmd.c src/algs/neldermead/neldermead.h src/algs/neldermead/sbplx.c
+  src/algs/auglag/auglag.c src/algs/auglag/auglag.h
+  src/algs/bobyqa/bobyqa.c src/algs/bobyqa/bobyqa.h
+  src/algs/isres/isres.c src/algs/isres/isres.h
+  src/algs/slsqp/slsqp.c src/algs/slsqp/slsqp.h
+  src/algs/esch/esch.c src/algs/esch/esch.h
+  src/api/general.c src/api/options.c src/api/optimize.c src/api/deprecated.c src/api/nlopt-internal.h src/api/nlopt.h src/api/f77api.c src/api/f77funcs.h src/api/f77funcs_.h src/api/nlopt.hpp src/api/nlopt-in.hpp
+  src/util/mt19937ar.c src/util/sobolseq.c src/util/soboldata.h src/util/timer.c src/util/stop.c src/util/nlopt-util.h src/util/redblack.c src/util/redblack.h src/util/qsort_r.c src/util/rescale.c
 )
 
-if (WITH_CXX)
-  list (APPEND NLOPT_SOURCES stogo/global.cc stogo/linalg.cc stogo/local.cc stogo/stogo.cc stogo/tools.cc stogo/global.h stogo/linalg.h stogo/local.h stogo/stogo_config.h stogo/stogo.h stogo/tools.h)
+if (NLOPT_CXX)
+  list (APPEND NLOPT_SOURCES src/algs/stogo/global.cc src/algs/stogo/linalg.cc src/algs/stogo/local.cc src/algs/stogo/stogo.cc src/algs/stogo/tools.cc
+        src/algs/stogo/global.h src/algs/stogo/linalg.h src/algs/stogo/local.h src/algs/stogo/stogo_config.h src/algs/stogo/stogo.h src/algs/stogo/tools.h)
+endif ()
+if (NLOPT_CXX11)
+  list (APPEND NLOPT_SOURCES src/algs/ags/data_types.hpp src/algs/ags/evolvent.hpp src/algs/ags/evolvent.cc src/algs/ags/solver.hpp src/algs/ags/solver.cc
+  src/algs/ags/local_optimizer.hpp src/algs/ags/local_optimizer.cc src/algs/ags/ags.h src/algs/ags/ags.cc)
 endif ()
 
+install (FILES ${NLOPT_HEADERS} DESTINATION ${RELATIVE_INSTALL_INCLUDE_DIR})
 
-if (BUILD_SHARED_LIBS)
-  add_definitions (-DNLOPT_DLL)
-  add_definitions (-DNLOPT_DLL_EXPORT)
-endif ()
-
-install (FILES ${NLOPT_HEADERS} DESTINATION ${INSTALL_INCLUDE_DIR})
-
-set (nlopt_lib nlopt${NLOPT_SUFFIX})
+set (nlopt_lib nlopt)
 add_library (${nlopt_lib} ${NLOPT_SOURCES})
 target_link_libraries (${nlopt_lib} ${M_LIBRARY})
 
-set_target_properties (${nlopt_lib} PROPERTIES SOVERSION 0)
-set_target_properties (${nlopt_lib} PROPERTIES VERSION 0.9.0)
+set_target_properties (${nlopt_lib} PROPERTIES SOVERSION ${SO_MAJOR})
+set_target_properties (${nlopt_lib} PROPERTIES VERSION "${SO_MAJOR}.${SO_MINOR}.${SO_PATCH}")
+
+#==============================================================================
+# INCLUDE DIRECTORIES
+#==============================================================================
+target_include_directories (${nlopt_lib} PRIVATE
+  ${PROJECT_BINARY_DIR}/src/api
+  ${PROJECT_BINARY_DIR}
+  src/algs/stogo
+  src/algs/ags
+  src/util
+  src/algs/direct
+  src/algs/cdirect
+  src/algs/praxis
+  src/algs/luksan
+  src/algs/crs
+  src/algs/mlsl
+  src/algs/mma
+  src/algs/cobyla
+  src/algs/newuoa
+  src/algs/neldermead
+  src/algs/auglag
+  src/algs/bobyqa
+  src/algs/isres
+  src/algs/slsqp
+  src/algs/esch
+  src/api)
+
+get_target_property (NLOPT_PRIVATE_INCLUDE_DIRS ${nlopt_lib} INCLUDE_DIRECTORIES)
+target_include_directories (${nlopt_lib} INTERFACE "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/src/api>" "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
+
+if (BUILD_SHARED_LIBS)
+  target_compile_definitions (${nlopt_lib} PUBLIC -DNLOPT_DLL)
+  target_compile_definitions (${nlopt_lib} PRIVATE -DNLOPT_DLL_EXPORT)
+endif ()
 
 # pass -fPIC in case swig module is built with static library
 if (NOT BUILD_SHARED_LIBS)
@@ -257,9 +278,13 @@ install ( TARGETS ${nlopt_lib}
           ARCHIVE DESTINATION ${RELATIVE_INSTALL_LIB_DIR}
         )
 
-add_subdirectory (api)
+if (MSVC AND BUILD_SHARED_LIBS AND NOT CMAKE_VERSION VERSION_LESS 3.1)
+  install (FILES $<TARGET_PDB_FILE:${nlopt_lib}> DESTINATION ${RELATIVE_INSTALL_BIN_DIR} CONFIGURATIONS Debug RelWithDebInfo COMPONENT Debug)
+endif ()
 
-if (BUILD_PYTHON)
+add_subdirectory (src/api)
+
+if (NLOPT_PYTHON)
   find_package (PythonInterp)
   find_package (PythonLibs)
   find_package (NumPy)
@@ -277,30 +302,33 @@ if (NOT DEFINED INSTALL_PYTHON_DIR AND PYTHONINTERP_FOUND)
 
 endif ()
 
-if (BUILD_GUILE)
+if (NLOPT_GUILE)
   find_package (Guile)
 endif ()
 
-if (USE_SWIG)
+if (NLOPT_SWIG)
   find_package (SWIG)
+  if (SWIG_FOUND)
+    add_subdirectory (src/swig)
+  endif ()
 endif ()
 
-add_subdirectory (swig)
-
-if (BUILD_OCTAVE)
+if (NLOPT_OCTAVE)
   find_package (Octave)
 endif ()
 
-if (BUILD_MATLAB)
-  find_package (Matlab)
+if (NLOPT_MATLAB)
+  find_package (Matlab COMPONENTS MX_LIBRARY)
 endif ()
 
 if (OCTAVE_FOUND OR Matlab_FOUND)
-  add_subdirectory (octave)
+  add_subdirectory (src/octave)
 endif ()
 
-enable_testing ()
-add_subdirectory (test)
+if (NLOPT_TESTS)
+  enable_testing ()
+  add_subdirectory (test)
+endif ()
 
 set (CPACK_PACKAGE_NAME          "${CMAKE_PROJECT_NAME}")
 set (CPACK_PACKAGE_VERSION_MAJOR "${NLOPT_MAJOR_VERSION}")
@@ -318,16 +346,17 @@ set (CPACK_SOURCE_PACKAGE_FILE_NAME ${CPACK_PACKAGE_NAME}-${NLOPT_VERSION_STRING
 include (CPack)
 
 # configuration files
-export (TARGETS ${nlopt_lib} FILE ${PROJECT_BINARY_DIR}/NLoptLibraryDepends.cmake)
+export (TARGETS ${nlopt_lib} NAMESPACE NLopt:: FILE ${PROJECT_BINARY_DIR}/NLoptLibraryDepends.cmake)
 
 # Install the export set for use with the install-tree
 install(EXPORT NLoptLibraryDepends
+        NAMESPACE NLopt::
         DESTINATION ${RELATIVE_INSTALL_CMAKE_DIR}
         COMPONENT Development)
 
 # Create a NLOPTConfig.cmake file for the use from the install tree
 # and install it
-set (NLOPT_LIBRARIES ${nlopt_lib})
+set (NLOPT_LIBRARIES "NLopt::${nlopt_lib}")
 
 set (NLOPT_CMAKE_DIR "${INSTALL_CMAKE_DIR}")
 file (RELATIVE_PATH rel_include_dir "${NLOPT_CMAKE_DIR}" "${INSTALL_INCLUDE_DIR}")
@@ -343,4 +372,3 @@ install (FILES
           ${CMAKE_CURRENT_BINARY_DIR}/NLoptConfigVersion.cmake
          DESTINATION ${RELATIVE_INSTALL_CMAKE_DIR}
          COMPONENT Development)
-
