@@ -1,4 +1,4 @@
-add_custom_target (nlopt_tests)
+add_custom_target (feelpp_nlopt_tests)
 
 # have to add timer.c and mt19937ar.c as symbols are declared extern
 add_executable (feelpp_nlopt_testopt testfuncs.c testfuncs.h testopt.c
