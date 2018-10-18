@@ -7,8 +7,6 @@
 *.so
 *.do
 *.o
-*.lo
-*.la
 *.a
 *.dylib
 *.dSYM
@@ -30,7 +28,7 @@ swig/nlopt-python.cpp
 swig/nlopt.py
 swig/nlopt.scm
 
-# build output and test executables
+# build output: prefer out-of-tree builds
 build/
 test/testopt
 test/box
@@ -71,3 +69,9 @@ stogo/prog
 stogo/testros
 stogo/tst
 stogo/tstc
+
+# MacOS
+.DS_Store
+
+# VSCode
+.vscode/

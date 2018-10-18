@@ -1,3 +1,4 @@
+[![Latest Docs](https://readthedocs.org/projects/nlopt/badge/?version=latest)](http://nlopt.readthedocs.io/en/latest/)
 [![Build Status](https://travis-ci.org/stevengj/nlopt.svg?branch=master)](https://travis-ci.org/stevengj/nlopt)
 [![Build Status](https://ci.appveyor.com/api/projects/status/github/stevengj/nlopt?branch=master&svg=true)](https://ci.appveyor.com/project/StevenGJohnson/nlopt)
 
@@ -14,7 +15,9 @@ NLopt is compiled and installed with the [CMake][1] build system
 
     git clone git://github.com/stevengj/nlopt
     cd nlopt
-    cmake .
+    mkdir build
+    cd build
+    cmake ..
     make
     sudo make install
 
@@ -36,4 +39,4 @@ be added in the future.
 
 [1]: https://cmake.org/
 [2]: http://www.swig.org/
-[3]: https://en.wikipedia.org/wiki/Man_pagey
+[3]: https://en.wikipedia.org/wiki/Man_page
