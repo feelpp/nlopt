@@ -224,10 +224,10 @@ install (FILES ${NLOPT_HEADERS} DESTINATION ${RELATIVE_INSTALL_INCLUDE_DIR})
 set (nlopt_lib feelpp_nlopt)
 add_library (${nlopt_lib} ${NLOPT_SOURCES})
 target_link_libraries (${nlopt_lib} ${M_LIBRARY})
+
 target_include_directories(feelpp_nlopt INTERFACE
-  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/api>
-  $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/api>
-  $<INSTALL_INTERFACE:include/feelpp/>
+  $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/src/api>
+  $<INSTALL_INTERFACE:include/feelpp/nlopt>
         )
 set_target_properties (${nlopt_lib} PROPERTIES SOVERSION ${SO_MAJOR})
 set_target_properties (${nlopt_lib} PROPERTIES VERSION "${SO_MAJOR}.${SO_MINOR}.${SO_PATCH}")
