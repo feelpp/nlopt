@@ -56,7 +56,7 @@ include (GNUInstallDirs)
 # Offer the user the choice of overriding the installation directories
 set (INSTALL_LIB_DIR     ${CMAKE_INSTALL_LIBDIR}        CACHE PATH "Installation directory for libraries")
 set (INSTALL_BIN_DIR     ${CMAKE_INSTALL_BINDIR}        CACHE PATH "Installation directory for executables")
-set (INSTALL_INCLUDE_DIR ${CMAKE_INSTALL_INCLUDEDIR}/feelpp/nlopt CACHE PATH "Installation directory for header files")
+set (INSTALL_INCLUDE_DIR ${CMAKE_INSTALL_INCLUDEDIR}/nlopt CACHE PATH "Installation directory for header files")
 set (INSTALL_DATA_DIR    ${CMAKE_INSTALL_DATADIR}/feelpp/nlopt    CACHE PATH "Installation directory for data files")
 set (INSTALL_MAN_DIR     ${CMAKE_INSTALL_MANDIR}/feelpp/nlopt     CACHE PATH "Installation directory for man documentation")
 set (INSTALL_CMAKE_DIR   ${CMAKE_INSTALL_DATADIR}/feelpp/nlopt    CACHE PATH "Installation directory for cmake config files")
