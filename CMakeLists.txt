@@ -374,5 +374,5 @@ configure_file (cmake/NLoptConfigVersion.cmake.in NLoptConfigVersion.cmake @ONLY
 install (FILES
           ${CMAKE_CURRENT_BINARY_DIR}/NLoptConfig.cmake
           ${CMAKE_CURRENT_BINARY_DIR}/NLoptConfigVersion.cmake
-         DESTINATION ${RELATIVE_INSTALL_CMAKE_DIR}/cmake
+         DESTINATION ${RELATIVE_INSTALL_CMAKE_DIR}/
          COMPONENT Development)
