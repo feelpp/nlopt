@@ -57,9 +57,9 @@ include (GNUInstallDirs)
 set (INSTALL_LIB_DIR     ${CMAKE_INSTALL_LIBDIR}        CACHE PATH "Installation directory for libraries")
 set (INSTALL_BIN_DIR     ${CMAKE_INSTALL_BINDIR}        CACHE PATH "Installation directory for executables")
 set (INSTALL_INCLUDE_DIR ${CMAKE_INSTALL_INCLUDEDIR}/nlopt CACHE PATH "Installation directory for header files")
-set (INSTALL_DATA_DIR    ${CMAKE_INSTALL_DATADIR}/feelpp/nlopt    CACHE PATH "Installation directory for data files")
+set (INSTALL_DATA_DIR    ${CMAKE_INSTALL_DATADIR}/nlopt    CACHE PATH "Installation directory for data files")
 set (INSTALL_MAN_DIR     ${CMAKE_INSTALL_MANDIR}/feelpp/nlopt     CACHE PATH "Installation directory for man documentation")
-set (INSTALL_CMAKE_DIR   ${CMAKE_INSTALL_DATADIR}/feelpp/nlopt    CACHE PATH "Installation directory for cmake config files")
+set (INSTALL_CMAKE_DIR   ${CMAKE_INSTALL_DATADIR}/feel/cmake/modules    CACHE PATH "Installation directory for cmake config files")
 
 # Make relative paths absolute (needed later on)
 foreach (p LIB BIN INCLUDE DATA CMAKE)
@@ -355,7 +355,7 @@ export (TARGETS ${nlopt_lib} NAMESPACE NLopt:: FILE ${PROJECT_BINARY_DIR}/NLoptL
 # Install the export set for use with the install-tree
 install(EXPORT NLoptLibraryDepends
         NAMESPACE NLopt::
-        DESTINATION ${RELATIVE_INSTALL_CMAKE_DIR}/cmake
+        DESTINATION ${RELATIVE_INSTALL_CMAKE_DIR}/
         COMPONENT Development)
 
 # Create a NLOPTConfig.cmake file for the use from the install tree
