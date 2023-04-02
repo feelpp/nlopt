@@ -24,7 +24,7 @@ static void update_(int *n, int *npt, double *bmat,
     double d__1, d__2, d__3;
 
     /* Local variables */
-    int i__, j, k, jl, jp;
+    int i__, j, k, jp;
     double one, tau, temp;
     int nptm;
     double zero, alpha, tempa, tempb, ztest;
@@ -70,7 +70,6 @@ static void update_(int *n, int *npt, double *bmat,
 
 /*     Apply the rotations that put zeros in the KNEW-th row of ZMAT. */
 
-    jl = 1;
     i__2 = nptm;
     for (j = 2; j <= i__2; ++j) {
 	if ((d__1 = zmat[*knew + j * zmat_dim1], fabs(d__1)) > ztest) {
@@ -158,7 +157,7 @@ static nlopt_result rescue_(int *n, int *npt, const double *xl, const double *xu
     /* Local variables */
     double f;
     int i__, j, k, ih, jp, ip, iq, np, iw;
-    double xp = 0.0, xq, den;
+    double xp = 0.0, xq = 0.0, den;
     int ihp = 0;
     double one;
     int ihq, jpn, kpt;
@@ -1179,7 +1178,7 @@ static void trsbox_(int *n, int *npt, double *xpt,
     int isav;
     double temp, zero, xsav = 0.0, xsum, angbd = 0.0, dredg = 0.0, sredg = 0.0;
     int iterc;
-    double resid, delsq, ggsav = 0.0, tempa, tempb, ratio, sqstp, redmax, 
+    double resid, delsq, ggsav = 0.0, tempa, tempb, redmax,
 	    dredsq = 0.0, redsav, onemin, gredsq = 0.0, rednew;
     int itcsav = 0;
     double rdprev, rdnext = 0.0, stplen, stepsq;
@@ -1259,7 +1258,6 @@ static void trsbox_(int *n, int *npt, double *xpt,
 
     iterc = 0;
     nact = 0;
-    sqstp = zero;
     i__1 = *n;
     for (i__ = 1; i__ <= i__1; ++i__) {
 	xbdi[i__] = zero;
@@ -1320,7 +1318,7 @@ L30:
 
 /*     Multiply the search direction by the second derivative matrix of Q and */
 /*     calculate some scalars for the choice of steplength. Then set BLEN to */
-/*     the length of the the step to the trust region boundary and STPLEN to */
+/*     the length of the step to the trust region boundary and STPLEN to */
 /*     the steplength, ignoring the simple bounds. */
 
     goto L210;
@@ -1512,7 +1510,6 @@ L120:
 		xbdi[i__] = one;
 		goto L100;
 	    }
-	    ratio = one;
 /* Computing 2nd power */
 	    d__1 = d__[i__];
 /* Computing 2nd power */
@@ -1729,7 +1726,8 @@ static nlopt_result prelim_(int *n, int *npt, double *x,
     int i__, j, k, ih, np, nfm;
     double one;
     int nfx, ipt = 0, jpt = 0;
-    double two, fbeg, diff, half, temp, zero, recip, stepa = 0.0, stepb = 0.0;
+    /* fbeg will be initialized below, init here to avoid maybe-uninitialized warning */
+    double two, fbeg = 0.0, diff, half, temp, zero, recip, stepa = 0.0, stepb = 0.0;
     int itemp;
     double rhosq;
 
@@ -2756,7 +2754,7 @@ L360:
 	    suma += zmat[knew + jj * zmat_dim1] * zmat[k + jj * zmat_dim1];
 	}
 	if (nlopt_isinf(suma)) {
-	  /* SGJ: detect singularity here (happend if we run
+	  /* SGJ: detect singularity here (happens if we run
 	     for too many iterations) ... is there another way to recover? */
 	  rc = NLOPT_ROUNDOFF_LIMITED;
 	  goto L720;
@@ -3125,9 +3123,11 @@ nlopt_result bobyqa(int n, int npt, double *x,
 
     /* SGJ, 2009: compute rhoend from NLopt stop info */
     rhoend = stop->xtol_rel * (rhobeg);
-    for (j = 0; j < n; ++j)
-	 if (rhoend < stop->xtol_abs[j] / fabs(s[j]))
-	      rhoend = stop->xtol_abs[j] / fabs(s[j]);
+    if (stop->xtol_abs) {
+        for (j = 0; j < n; ++j)
+         if (rhoend < stop->xtol_abs[j] / fabs(s[j]))
+              rhoend = stop->xtol_abs[j] / fabs(s[j]);
+    }
 
 
 /*     This subroutine seeks the least value of a function of many variables, */

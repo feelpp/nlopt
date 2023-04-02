@@ -57,15 +57,15 @@ typedef struct IndividualStructure {
 } Individual;
 
 static int CompareIndividuals(void *unused, const void *a_, const void *b_) {
-     /* (void) unused; */
      const Individual *a = (const Individual *) a_;
      const Individual *b = (const Individual *) b_;
+     (void) unused;
      return a->fitness < b->fitness ? -1 : (a->fitness > b->fitness ? +1 : 0);
 }
 
 nlopt_result chevolutionarystrategy(
      unsigned nparameters, /* Number of input parameters */
-     nlopt_func f,	/* Recursive Objective Funtion Call */
+     nlopt_func f,	/* Recursive Objective Function Call */
      void * data_f,	/* Data to Objective Function */
      const double* lb,			/* Lower bound values */
      const double* ub,			/* Upper bound values */
@@ -91,7 +91,7 @@ nlopt_result chevolutionarystrategy(
       * is achieved, they are ranked and updated. */
 
      /*********************************
-      * controling the population size
+      * controlling the population size
       *********************************/
      if (!np) np = 40;
      if (!no) no = 60;
