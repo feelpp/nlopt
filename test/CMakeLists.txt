@@ -1,4 +1,4 @@
-add_custom_target (feelpp_nlopt_tests)
+add_custom_target (tests)
 
 macro(NLOPT_add_cpp_test test_name)
   add_executable (${test_name} ${test_name}.cxx)
@@ -26,7 +26,7 @@ target_include_directories (testopt PRIVATE ${NLOPT_PRIVATE_INCLUDE_DIRS})
 add_dependencies (tests testopt)
 
 if (NLOPT_CXX)
-  set_target_properties(feelpp_nlopt_testopt PROPERTIES LINKER_LANGUAGE CXX)
+  set_target_properties(testopt PROPERTIES LINKER_LANGUAGE CXX)
 endif ()
 
 foreach (algo_index RANGE 29)# 43
@@ -51,7 +51,7 @@ foreach (algo_index RANGE 29)# 43
       set (enable_ FALSE)
     endif ()
     if (enable_)
-      add_test (NAME testopt_algo${algo_index}_obj${obj_index} COMMAND feelpp_nlopt_testopt -r 0 -a ${algo_index} -o ${obj_index})
+      add_test (NAME testopt_algo${algo_index}_obj${obj_index} COMMAND testopt -r 0 -a ${algo_index} -o ${obj_index})
       if (CMAKE_HOST_SYSTEM_NAME MATCHES Windows)
         set_tests_properties (testopt_algo${algo_index}_obj${obj_index} PROPERTIES ENVIRONMENT "PATH=${PROJECT_BINARY_DIR}\\${CMAKE_BUILD_TYPE};$ENV{PATH}")  # to load dll
       endif ()
