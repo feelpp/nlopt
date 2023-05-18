@@ -30,10 +30,13 @@
  * 
  * The original source code can be found at :
  * http://plato.la.asu.edu/topics/problems/nlores.html
+ *
+ * Original RCS id
+ * static char const rcsid[] =
+ *  "	@(#) $Jeannot: cobyla.c,v 1.11 2004/04/18 09:51:36 js Exp $";
+ *
  */
 
-static char const rcsid[] =
-  "@(#) $Jeannot: cobyla.c,v 1.11 2004/04/18 09:51:36 js Exp $";
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -216,9 +219,10 @@ nlopt_result cobyla_minimize(unsigned n, nlopt_func f, void *f_data,
      /* SGJ, 2008: compute rhoend from NLopt stop info */
      rhobeg = fabs(dx[0] / s.scale[0]);
      rhoend = stop->xtol_rel * (rhobeg);
-     for (j = 0; j < n; ++j)
-	  if (rhoend < stop->xtol_abs[j] / fabs(s.scale[j]))
-	       rhoend = stop->xtol_abs[j] / fabs(s.scale[j]);
+     if (stop->xtol_abs)
+      for (j = 0; j < n; ++j)
+	   if (rhoend < stop->xtol_abs[j] / fabs(s.scale[j]))
+	        rhoend = stop->xtol_abs[j] / fabs(s.scale[j]);
 
      /* each equality constraint gives two inequality constraints */
      m = nlopt_count_constraints(m, fc) + 2 * nlopt_count_constraints(p, h);
@@ -1259,7 +1263,7 @@ static nlopt_result trstlp(int *n, int *m, double *a,
   double spabs;
   double temp, step;
   int icount;
-  int iout, i__, j, k;
+  int i__, j, k;
   int isave;
   int kk;
   int kl, kp, kw;
@@ -1476,10 +1480,8 @@ L130:
     temp = zdotv / zdota[k];
     if (temp > 0. && iact[k] <= *m) {
       tempa = vmultc[k] / temp;
-      if (ratio < 0. || tempa < ratio) {
+      if (ratio < 0. || tempa < ratio)
         ratio = tempa;
-        iout = k;
-      }
     }
     if (k >= 2) {
       kw = iact[k];

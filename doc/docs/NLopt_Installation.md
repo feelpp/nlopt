@@ -60,7 +60,7 @@ setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:/foo/bar/lib
 
 in [csh](https://en.wikipedia.org/wiki/csh) or [w:tcsh](https://en.wikipedia.org/wiki/tcsh).
 
-Alternatively, in GNU/Linux systems, you can add the library directory to the system-wide file `/etc/ld.so.conf` and then (as root) run `/sbin/ldconfig`. [Category:NLopt](index.md)
+Alternatively, in GNU/Linux systems, you can add the library directory to the system-wide file `/etc/ld.so.conf` and then (as root) run `/sbin/ldconfig`.
 
 Static libraries
 ----------------
@@ -99,11 +99,17 @@ cmake -DINSTALL_MEX_DIR=dir ..
 
 to install the Matlab plugins in directory *dir*. In this case, however, when you run Matlab you will either need to run in the *dir* directory or explicitly add *dir* to your Matlab path (see the Matlab `path` command).
 
+Matlab's standard C++ library might be incompatible with the one used by your compiler, in that case you can try to disable the C++ algorithms:
+
+```sh
+cmake -DNLOPT_CXX=OFF ..
+```
+
 ### Octave
 
 For the Octave plugins to be installed, you need to have the Octave `mkoctfile` program in your PATH. `mkoctfile` is Octave's equivalent of `mex`. If you are using a GNU/Linux system, and you installed Octave using one of the precompiled packages for your distribution, then you probably need to install a *separate package* to get `mkoctfile`. For example, on Debian you need to install the `octave-headers` package, and on Redhat you need the `octave-devel` package.
 
-By default, the compiled Octave plugins (`.oct` files) are installed into the octave extension binary directory relatively to the installation prefix (usually something like `/usr/local/lib/octave/2.1.73/site/oct/i486-pc-linux-gnu`), and the .m script files are installed into the site extension directory relatively the the installation prefix (usually something like `/usr/local/share/octave/2.1.73/site/m/`). You can change these defaults by passing `INSTALL_OCT_DIR` and `INSTALL_M_DIR`, respectively, to the cmake script, via:
+By default, the compiled Octave plugins (`.oct` files) are installed into the octave extension binary directory relatively to the installation prefix (usually something like `/usr/local/lib/octave/2.1.73/site/oct/i486-pc-linux-gnu`), and the .m script files are installed into the site extension directory relatively to the installation prefix (usually something like `/usr/local/share/octave/2.1.73/site/m/`). You can change these defaults by passing `INSTALL_OCT_DIR` and `INSTALL_M_DIR`, respectively, to the cmake script, via:
 
 ```sh
 cmake -DINSTALL_OCT_DIR=octdir -DINSTALL_M_DIR=mdir ..
@@ -114,10 +120,10 @@ Python plugins
 
 If [Python](https://en.wikipedia.org/wiki/Python_(programming_language)) is installed on your machine, and you configured NLopt as a shared library (see above), then NLopt will automatically compile and install a Python `nlopt` module. You also need [NumPy](https://en.wikipedia.org/wiki/NumPy) to be installed, as NLopt's Python interface uses NumPy array types.
 
-To specify a particular version or location of Python, use the `PYTHON_EXECUTABLE` variable to set the full path to the `python` executable:
+To specify a particular version or location of Python, use the `Python_EXECUTABLE` variable to set the full path to the `python` executable:
 
 ```sh
-cmake -DPYTHON_EXECUTABLE=/usr/bin/python ..
+cmake -DPython_EXECUTABLE=/usr/bin/python ..
 ```
 
 GNU Guile plugins
