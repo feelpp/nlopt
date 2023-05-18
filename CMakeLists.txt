@@ -39,8 +39,8 @@ option (NLOPT_CXX "enable cxx routines" ON)
 option (NLOPT_FORTRAN "enable fortran tests" OFF)
 option (BUILD_SHARED_LIBS "Build NLopt as a shared library" ON)
 option (NLOPT_PYTHON "build python bindings" ON)
-option (NLOPT_OCTAVE "build octave bindings" OFF)
-option (NLOPT_MATLAB "build matlab bindings" OFF)
+option (NLOPT_OCTAVE "build octave bindings" ON)
+option (NLOPT_MATLAB "build matlab bindings" ON)
 option (NLOPT_GUILE "build guile bindings" ON)
 option (NLOPT_SWIG "use SWIG to build bindings" ON)
 
@@ -59,10 +59,10 @@ include (GNUInstallDirs)
 # Offer the user the choice of overriding the installation directories
 set (INSTALL_LIB_DIR     ${CMAKE_INSTALL_LIBDIR}        CACHE PATH "Installation directory for libraries")
 set (INSTALL_BIN_DIR     ${CMAKE_INSTALL_BINDIR}        CACHE PATH "Installation directory for executables")
-set (INSTALL_INCLUDE_DIR ${CMAKE_INSTALL_INCLUDEDIR}/feelpp/nlopt CACHE PATH "Installation directory for header files")
-set (INSTALL_DATA_DIR    ${CMAKE_INSTALL_DATADIR}/feelpp/nlopt    CACHE PATH "Installation directory for data files")
-set (INSTALL_MAN_DIR     ${CMAKE_INSTALL_MANDIR}/feelpp/nlopt     CACHE PATH "Installation directory for man documentation")
-set (INSTALL_CMAKE_DIR   ${CMAKE_INSTALL_DATADIR}/feelpp/nlopt    CACHE PATH "Installation directory for cmake config files")
+set (INSTALL_INCLUDE_DIR ${CMAKE_INSTALL_INCLUDEDIR}    CACHE PATH "Installation directory for header files")
+set (INSTALL_DATA_DIR    ${CMAKE_INSTALL_DATADIR}/nlopt CACHE PATH "Installation directory for data files")
+set (INSTALL_MAN_DIR     ${CMAKE_INSTALL_MANDIR}        CACHE PATH "Installation directory for man documentation")
+set (INSTALL_CMAKE_DIR   ${INSTALL_LIB_DIR}/cmake/nlopt CACHE PATH "Installation directory for cmake config files")
 
 # Make relative paths absolute (needed later on)
 foreach (p LIB BIN INCLUDE DATA CMAKE)
@@ -176,7 +176,7 @@ configure_file (${CMAKE_CURRENT_SOURCE_DIR}/nlopt_config.h.in ${CMAKE_CURRENT_BI
 # pkgconfig file
 if (UNIX OR MINGW)
   configure_file (${CMAKE_CURRENT_SOURCE_DIR}/nlopt.pc.in ${CMAKE_CURRENT_BINARY_DIR}/nlopt.pc @ONLY)
-  install (FILES ${CMAKE_CURRENT_BINARY_DIR}/nlopt.pc DESTINATION share/feelpp/nlopt/pkgconfig)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/nlopt.pc DESTINATION ${RELATIVE_INSTALL_LIB_DIR}/pkgconfig)
 endif ()
 
 #==============================================================================
@@ -243,15 +243,11 @@ endif ()
 
 install (FILES ${NLOPT_HEADERS} DESTINATION ${RELATIVE_INSTALL_INCLUDE_DIR})
 
-set (nlopt_lib feelpp_nlopt)
+set (nlopt_lib nlopt)
 add_library (${nlopt_lib} ${NLOPT_SOURCES})
 add_dependencies(${nlopt_lib} generate-cpp)
 target_link_libraries (${nlopt_lib} ${M_LIBRARY})
 
-target_include_directories(feelpp_nlopt INTERFACE
-  $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/src/api>
-  $<INSTALL_INTERFACE:include/feelpp/nlopt>
-        )
 set_target_properties (${nlopt_lib} PROPERTIES SOVERSION ${SO_MAJOR})
 set_target_properties (${nlopt_lib} PROPERTIES VERSION "${SO_MAJOR}.${SO_MINOR}.${SO_PATCH}")
 
@@ -381,9 +377,9 @@ include (CPack)
 export (TARGETS ${nlopt_lib} NAMESPACE NLopt:: FILE ${PROJECT_BINARY_DIR}/NLoptLibraryDepends.cmake)
 
 # Install the export set for use with the install-tree
-install(EXPORT NLoptLibraryDepends
+install(EXPORT NLoptLibraryDepends 
         NAMESPACE NLopt::
-        DESTINATION ${RELATIVE_INSTALL_CMAKE_DIR}/cmake
+        DESTINATION ${RELATIVE_INSTALL_CMAKE_DIR}
         COMPONENT Development)
 
 # Create a NLOPTConfig.cmake file for the use from the install tree
