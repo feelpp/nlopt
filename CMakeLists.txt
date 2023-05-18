@@ -176,7 +176,7 @@ configure_file (${CMAKE_CURRENT_SOURCE_DIR}/nlopt_config.h.in ${CMAKE_CURRENT_BI
 # pkgconfig file
 if (UNIX OR MINGW)
   configure_file (${CMAKE_CURRENT_SOURCE_DIR}/nlopt.pc.in ${CMAKE_CURRENT_BINARY_DIR}/nlopt.pc @ONLY)
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/nlopt.pc DESTINATION ${RELATIVE_INSTALL_LIB_DIR}/pkgconfig)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/nlopt.pc DESTINATION ${CMAKE_INSTALL_DATADIR}/pkgconfig/)
 endif ()
 
 #==============================================================================
