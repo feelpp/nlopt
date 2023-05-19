@@ -395,8 +395,8 @@ list (APPEND RELATIVE_NLOPT_LIB_DIR ${rel_lib_dir})
 
 configure_file (cmake/NLoptConfig.cmake.in NLoptConfig.cmake @ONLY)
 configure_file (cmake/NLoptConfigVersion.cmake.in NLoptConfigVersion.cmake @ONLY)
-install (FILES
-          ${CMAKE_CURRENT_BINARY_DIR}/NLoptConfig.cmake
-          ${CMAKE_CURRENT_BINARY_DIR}/NLoptConfigVersion.cmake
-         DESTINATION ${RELATIVE_INSTALL_CMAKE_DIR}/cmake
-         COMPONENT Development)
+install(FILES
+  ${CMAKE_CURRENT_BINARY_DIR}/NLoptConfig.cmake
+  ${CMAKE_CURRENT_BINARY_DIR}/NLoptConfigVersion.cmake
+  DESTINATION ${INSTALL_CMAKE_DIR}
+  COMPONENT Development)
