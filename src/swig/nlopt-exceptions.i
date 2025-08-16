@@ -6,6 +6,7 @@
 
 %catches(std::bad_alloc) nlopt::opt::opt();
 %catches(std::bad_alloc) nlopt::opt::opt(algorithm a, unsigned n);
+%catches(std::bad_alloc,std::invalid_argument) nlopt::opt::opt(const char *algo_str, unsigned n);
 %catches(std::bad_alloc) nlopt::opt::opt(const opt& f);
 %catches(std::bad_alloc) nlopt::opt::operator=(opt const& f);
 
@@ -53,6 +54,7 @@ GETSET_EXCEPT(ftol_rel, double)
 GETSET_EXCEPT(ftol_abs, double)
 GETSET_EXCEPT(xtol_rel, double)
 GETSETVEC_EXCEPT(xtol_abs)
+GETSETVEC_EXCEPT(x_weights)
 GETSET_EXCEPT(maxeval, int)
 GETSET_EXCEPT(maxtime, double)
 GETSET_EXCEPT(force_stop, int)

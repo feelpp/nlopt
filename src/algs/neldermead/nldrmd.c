@@ -39,7 +39,7 @@ static int simplex_compare(double *k1, double *k2)
 {
      if (*k1 < *k2) return -1;
      if (*k1 > *k2) return +1;
-     return k1 - k2; /* tie-breaker */
+     return (int)(k1 - k2); /* tie-breaker */
 }
 
 /* return 1 if a and b are approximately equal relative to floating-point
@@ -125,7 +125,7 @@ nlopt_result nldrmd_minimize_(int n, nlopt_func f, void *f_data,
      c = scratch + (n+1)*(n+1);
      xcur = c + n;
 
-     rb_tree_init(&t, simplex_compare);
+     nlopt_rb_tree_init(&t, simplex_compare);
 
      *fdiff = HUGE_VAL;
 
@@ -165,14 +165,14 @@ nlopt_result nldrmd_minimize_(int n, nlopt_func f, void *f_data,
 
  restart:
      for (i = 0; i < n + 1; ++i)
-	  if (!rb_tree_insert(&t, pts + i*(n+1))) {
+	  if (!nlopt_rb_tree_insert(&t, pts + i*(n+1))) {
 	       ret = NLOPT_OUT_OF_MEMORY;
 	       goto done;
 	  }
 
      while (1) {
-	  rb_node *low = rb_tree_min(&t);
-	  rb_node *high = rb_tree_max(&t);
+	  rb_node *low = nlopt_rb_tree_min(&t);
+	  rb_node *high = nlopt_rb_tree_max(&t);
 	  double fl = low->k[0], *xl = low->k + 1;
 	  double fh = high->k[0], *xh = high->k + 1;
 	  double fr;
@@ -187,7 +187,7 @@ nlopt_result nldrmd_minimize_(int n, nlopt_func f, void *f_data,
 	       goto done;
 	  }
 
-	  /* compute centroid ... if we cared about the perfomance of this,
+	  /* compute centroid ... if we cared about the performance of this,
 	     we could do it iteratively by updating the centroid on
 	     each step, but then we would have to be more careful about
 	     accumulation of rounding errors... anyway n is unlikely to
@@ -202,7 +202,10 @@ nlopt_result nldrmd_minimize_(int n, nlopt_func f, void *f_data,
 	  for (i = 0; i < n; ++i) c[i] *= ninv;
 
 	  /* x convergence check: find xcur = max radius from centroid */
-	  memset(xcur, 0, sizeof(double)*n);
+		if (n > 0)
+		{
+	    memset(xcur, 0, sizeof(double)*n);
+		}
 	  for (i = 0; i < n + 1; ++i) {
                double *xi = pts + i*(n+1) + 1;
 	       for (j = 0; j < n; ++j) {
@@ -242,7 +245,7 @@ nlopt_result nldrmd_minimize_(int n, nlopt_func f, void *f_data,
 		    memcpy(xh, xcur, sizeof(double)*n);
 	       }
 	  }
-	  else if (fr < rb_tree_pred(high)->k[0]) { /* accept new point */
+	  else if (fr < nlopt_rb_tree_pred(high)->k[0]) { /* accept new point */
 	       memcpy(xh, xcur, sizeof(double)*n);
 	       fh = fr;
 	  }
@@ -258,8 +261,8 @@ nlopt_result nldrmd_minimize_(int n, nlopt_func f, void *f_data,
 		    fh = fc;
 	       }
 	       else { /* failed contraction, shrink simplex */
-		    rb_tree_destroy(&t);
-		    rb_tree_init(&t, simplex_compare);
+		    nlopt_rb_tree_destroy(&t);
+		    nlopt_rb_tree_init(&t, simplex_compare);
 		    for (i = 0; i < n+1; ++i) {
 			 double *pt = pts + i * (n+1);
 			 if (pt+1 != xl) {
@@ -276,11 +279,11 @@ nlopt_result nldrmd_minimize_(int n, nlopt_func f, void *f_data,
 	  }
 
 	  high->k[0] = fh;
-	  rb_tree_resort(&t, high);
+	  nlopt_rb_tree_resort(&t, high);
      }
      
 done:
-     rb_tree_destroy(&t);
+     nlopt_rb_tree_destroy(&t);
      return ret;
 }
 

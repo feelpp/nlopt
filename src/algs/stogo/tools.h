@@ -4,21 +4,14 @@
 #ifndef TOOLS_H
 #define TOOLS_H
 
-#include <float.h>
-#include <iostream>
+#include <cfloat>
+#include <ostream>
 
 #include <algorithm>
 #include <iterator>
 #include <list>
 
 #include "linalg.h"
-
-#ifndef FALSE
-const int FALSE=(1==0); // boolean FALSE
-#endif
-#ifndef FALSE
-const int TRUE=(1==1); // boolean TRUE
-#endif
 
 typedef const class Trial CTrial;
 typedef CTrial& RCTrial;
@@ -36,7 +29,7 @@ public:
   friend ostream & operator << (ostream &, RCTrial) ;
 };
 
-class TrialGT : public unary_function<Trial, bool>
+class TrialGT
 // Predicate for Trial (needed for remove_if)
 {
 public:
@@ -98,7 +91,7 @@ public:
   void ClearBox();            
   bool CloseToMin(RVector&, double*, double);
 
-  unsigned int NStationary();      // Returns the number of stationary points
+  int NStationary();      // Returns the number of stationary points
 
   void split(RTBox, RTBox);     // Split a box
   void dispTrials();

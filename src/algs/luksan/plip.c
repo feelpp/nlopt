@@ -110,13 +110,13 @@
 /* PROBLEMS. */
 
 static void plip_(int *nf, int *nb, double *x, int *
-		  ix, double *xl, double *xu, double *gf, double *s, 
-		  double *xo, double *go, double *so, double *xm, 
-		  double *xr, double *gr, double *xmax, double *tolx, 
-		  double *tolf, double *tolb, double *tolg, 
+		  ix, double *xl, double *xu, double *gf, double *s,
+		  double *xo, double *go, double *so, double *xm,
+		  double *xr, double *gr, double *xmax, double *tolx,
+		  double *tolf, double *tolb, double *tolg,
 		  nlopt_stopping *stop, double *
-		  minf_est, double *gmax, double *f, int *mit, int *mfv, 
-		  int *iest, int *met, int *mf, 
+		  minf_est, double *gmax, double *f, int *mit, int *mfv,
+		  int *iest, int *met, int *mf,
 		  int *iterm, stat_common *stat_1,
 		  nlopt_func objgrad, void *objgrad_data)
 {
@@ -136,10 +136,10 @@ static void plip_(int *nf, int *nb, double *x, int *
     int kbf, mec, mfg;
     double par;
     int mes, kit;
-    double alf1, alf2, eta0, eta9, par1, par2;
-    int mes1, mes2, mes3, met3;
+    double alf1, alf2, eta9, par1, par2;
+    int met3;
     double eps8, eps9;
-    int meta, mred, nred, iold;
+    int mred, nred, iold;
     double maxf, dmax__;
     int xstop = 0;
     int inew;
@@ -154,6 +154,8 @@ static void plip_(int *nf, int *nb, double *x, int *
     double snorm;
     int mtesx, ntesx;
     ps1l01_state state;
+
+    (void) tolb;
 
 /*     INITIATION */
 
@@ -196,14 +198,9 @@ static void plip_(int *nf, int *nb, double *x, int *
     ires1 = 999;
     ires2 = 0;
     mred = 10;
-    meta = 1;
     met3 = 4;
     mec = 4;
     mes = 4;
-    mes1 = 2;
-    mes2 = 2;
-    mes3 = 2;
-    eta0 = 1e-15;
     eta9 = 1e120;
     eps8 = 1.;
     eps9 = 1e-8;
@@ -284,8 +281,8 @@ static void plip_(int *nf, int *nb, double *x, int *
     if (nlopt_stop_time(stop)) { *iterm = 100; goto L11190; }
 L11120:
     luksan_pytrcg__(nf, nf, &ix[1], &gf[1], &umax, gmax, &kbf, &iold);
-    luksan_pyfut1__(nf, f, &fo, &umax, gmax, xstop, stop, tolg, 
-	    &kd, &stat_1->nit, &kit, mit, &stat_1->nfg, &mfg, 
+    luksan_pyfut1__(nf, f, &fo, &umax, gmax, xstop, stop, tolg,
+	    &kd, &stat_1->nit, &kit, mit, &stat_1->nfg, &mfg,
 	    &ntesx, &mtesx, &ntesf, &mtesf, &ites, &ires1, &ires2, &irest, &
 	    iters, iterm);
     if (*iterm != 0) {
@@ -374,7 +371,7 @@ L11130:
 	goto L11175;
     }
 L11170:
-    luksan_ps1l01__(&r__, &rp, f, &fo, &fp, &p, &po, &pp, minf_est, &maxf, &rmin, 
+    luksan_ps1l01__(&r__, &rp, f, &fo, &fp, &p, &po, &pp, minf_est, &maxf, &rmin,
 	    &rmax, &tols, &tolp, &par1, &par2, &kd, &ld, &stat_1->nit, &kit, &
 	    nred, &mred, &maxst, iest, &inits, &iters, &kters, &mes,
 		    &isys, &state);
@@ -430,13 +427,13 @@ nlopt_result luksan_plip(int n, nlopt_func f, void *f_data,
 			 double *minf,
 			 nlopt_stopping *stop,
 			 int mf, /* subspace dimension (0 for default) */
-			 int method) /* 1 or 2, see below */
+			 int method, /* 1 or 2, see below */
+			 double tolg) /* gradient tolerance */
 {
      int i, *ix, nb = 1;
      double *work, *xl, *xu, *gf, *s, *xo, *go, *so, *xm, *xr, *gr;
      double gmax, minf_est;
      double xmax = 0; /* no maximum */
-     double tolg = 0; /* default gradient tolerance */
      int iest = 0; /* we have no estimate of min function value */
      int mit = 0; /* default no limit on #iterations */
      int mfv = stop->maxeval;
@@ -448,14 +445,14 @@ nlopt_result luksan_plip(int n, nlopt_func f, void *f_data,
 
      if (mf <= 0) {
 	  mf = MAX2(MEMAVAIL/n, 10);
-	  if (stop->maxeval && stop->maxeval <= mf)
+	  if (stop->maxeval > 0 && stop->maxeval <= mf)
 	       mf = MAX2(stop->maxeval, 1);
      }
 
  retry_alloc:
-     work = (double*) malloc(sizeof(double) * (n * 7 + MAX2(n,n*mf) + 
+     work = (double*) malloc(sizeof(double) * (n * 7 + MAX2(n,n*mf) +
 					       MAX2(n,mf)*2));
-     if (!work) { 
+     if (!work) {
 	  if (mf > 0) {
 	       mf = 0; /* allocate minimal memory */
 	       goto retry_alloc;
@@ -483,7 +480,7 @@ nlopt_result luksan_plip(int n, nlopt_func f, void *f_data,
 	arrays to zero by default? */
      memset(xo, 0, sizeof(double) * MAX2(n,n*mf));
 
-     plip_(&n, &nb, x, ix, xl, xu, 
+     plip_(&n, &nb, x, ix, xl, xu,
 	   gf, s, xo, go, so, xm, xr, gr,
 	   &xmax,
 

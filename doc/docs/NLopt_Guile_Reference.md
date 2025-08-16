@@ -9,7 +9,7 @@ The main purpose of this section is to document the syntax and unique features o
 Using the NLopt Guile API
 -------------------------
 
-To use NLopt in Python, your Python program should include the lines:
+To use NLopt in GNU Guile, your Guile program should include the lines:
 
 ```
 (use-modules (nlopt))
@@ -88,7 +88,7 @@ Note that `grad` must be modified `in-place` by your function `f`, by using `(ve
 Bound constraints
 -----------------
 
-The [bound constraints](NLopt_Reference#Bound_constraints.md) can be specified by calling the methods:
+The [bound constraints](NLopt_Reference.md#bound-constraints) can be specified by calling the methods:
 
 ```
 (nlopt-opt-set-lower-bounds opt lb)
@@ -113,7 +113,7 @@ To specify an unbounded dimension, you can use `(inf)` or `(-` `(inf))` in Guile
 Nonlinear constraints
 ---------------------
 
-Just as for [nonlinear constraints in C](NLopt_Reference#Nonlinear_constraints.md), you can specify nonlinear inequality and equality constraints by the methods:
+Just as for [nonlinear constraints in C](NLopt_Reference.md#nonlinear-constraints), you can specify nonlinear inequality and equality constraints by the methods:
 
 ```
 (nlopt-opt-add-inequality-constraint opt fc tol)
@@ -134,7 +134,7 @@ To remove all of the inequality and/or equality constraints from a given problem
 Stopping criteria
 -----------------
 
-As explained in the [C API Reference](NLopt_Reference#Stopping_criteria.md) and the [Introduction](NLopt_Introduction#Termination_conditions.md)), you have multiple options for different stopping criteria that you can specify. (Unspecified stopping criteria are disabled; i.e., they have innocuous defaults.)
+As explained in the [C API Reference](NLopt_Reference.md#stopping-criteria) and the [Introduction](NLopt_Introduction.md#termination-conditions)), you have multiple options for different stopping criteria that you can specify. (Unspecified stopping criteria are disabled; i.e., they have innocuous defaults.)
 
 For each stopping criteria, there are (at least) two method: a `set` method to specify the stopping criterion, and a `get` method to retrieve the current value for that criterion. The meanings of each criterion are exactly the same as in the C API.
 
@@ -177,6 +177,14 @@ Set relative tolerance on optimization parameters.
 
 
 Set absolute tolerances on optimization parameters. The `tol` input must be a vector or list of length `n` (the dimension specified in the `nlopt.opt` constructor); alternatively, you can pass a single number in order to set the same tolerance for all optimization parameters. `get-xtol-abs()` returns the tolerances as a vector.
+
+```
+(nlopt-opt-set-x-weights opt x)
+(nlopt-opt-get-x-weights opt x)
+```
+
+
+Set the weights used when the computing L₁ norm for the `xtol_rel` stopping criterion above.
 
 ```
 (nlopt-opt-set-maxeval opt maxeval)
@@ -222,16 +230,16 @@ You can call the following methods to retrieve the optimized objective function 
 ```
 
 
-The return code (see below) is positive on success, indicating the reason for termination. On failure (negative return codes), `optimize` throws an exception (see [Exceptions](#Exceptions.md), below).
+The return code (see below) is positive on success, indicating the reason for termination. On failure (negative return codes), by default, `optimize` throws an exception (see [Exceptions](#exceptions), below).
 
 ### Return values
 
-The possible return values are the same as the [return values in the C API](NLopt_Reference#Return_values.md), except that the `NLOPT_` prefix is replaced with the `NLOPT-` namespace. That is, `NLOPT_SUCCESS` becomes `NLOPT-SUCCESS`, etcetera.
+The possible return values are the same as the [return values in the C API](NLopt_Reference.md#return-values), except that the `NLOPT_` prefix is replaced with the `NLOPT-` namespace. That is, `NLOPT_SUCCESS` becomes `NLOPT-SUCCESS`, etcetera.
 
 Exceptions
 ----------
 
-The [Error codes (negative return values)](NLopt_Reference#Error_codes_(negative_return_values).md) in the C API are replaced in the Guile API by thrown exceptions. The exception key takes the form of a Scheme symbol. The following exception keys are thrown by the various routines:
+If exceptions are enabled (the default), the [Error codes (negative return values)](NLopt_Reference.md#error-codes-negative-return-values) in the C API are replaced in the Guile API by thrown exceptions. The exception key takes the form of a Scheme symbol. The following exception keys are thrown by the various routines:
 
 ```
 runtime-error
@@ -255,7 +263,16 @@ Ran out of memory (a memory allocation failed), equivalent to `NLOPT_OUT_OF_MEMO
 Halted because roundoff errors limited progress, equivalent to `NLOPT_ROUNDOFF_LIMITED`.
 
 `forced-stop` (subclass of `Exception`)
-Halted because of a [forced termination](#Forced_termination.md): the user called `opt.force_stop()` from the user’s objective function. Equivalent to `NLOPT_FORCED_STOP`.
+Halted because of a forced termination: the user called `opt.force_stop()` from the user’s objective function. Equivalent to `NLOPT_FORCED_STOP`.
+
+Whether this behavior is enabled or whether `nlopt-opt-optimize` just returns the error code as is is controlled by the `enable_exceptions` flag in `nlopt::opt`, which can be set and retrieved with the methods below.
+
+```
+(nlopt-opt-set_exceptions_enabled opt enable)
+(nlopt-opt-get_exceptions_enabled opt)
+```
+
+The default is `#t` (true), i.e., to throw an exception. When setting `(nlopt-opt-set_exceptions_enabled opt #f)` (false), it is the caller's responsibility to *manually* check `(nlopt-opt-last-optimize-result opt)`. While that makes the `#f` setting more error-prone, it has the advantage that the best point found (which can be quite good even in some error cases) can still be returned through the return value of `nlopt-opt-optimize`, so is not lost, whereas if exceptions are enabled through `(nlopt-opt-set_exceptions_enabled opt #t)`, the exception prevents the best point from being returned.
 
 Currently, NLopt does not catch any exceptions that you might throw from your objective or constraint functions. (In the future, we might catch these exceptions, halt the optimization gracefully, and then re-throw, as in Python or C++, but this is not yet implemented.) So, throwing an exception in your objective/constraint may result in a memory leak.
 
@@ -273,7 +290,7 @@ To catch an [exception in Guile](http://www.gnu.org/software/guile/manual/html_n
 ```
 
 
-Note that the [catch statement](http://www.gnu.org/software/guile/manual/html_node/Catch.html) takes three arguments: the first is a key to catch (\#t for all), the second is a [thunk](https://en.wikipedia.org/wiki/Thunk) function to do whatever it is that might throw exceptions (the equivalent of a C++ `try` block), and the third is a function that is called if there is an exception (the equivalent of a C++ `catch` block). Note that `xopt` is set to the return value of `nlopt-opt-optimize` on success, or `#f` (the return value of our throw handler) on an exception.
+Note that the [catch statement](http://www.gnu.org/software/guile/manual/html_node/Catch.html) takes three arguments: the first is a key to catch (`#t` for all), the second is a [thunk](https://en.wikipedia.org/wiki/Thunk) function to do whatever it is that might throw exceptions (the equivalent of a C++ `try` block), and the third is a function that is called if there is an exception (the equivalent of a C++ `catch` block). Note that `xopt` is set to the return value of `nlopt-opt-optimize` on success, or `#f` (the return value of our throw handler) on an exception.
 
 Local/subsidiary optimization algorithm
 ---------------------------------------
@@ -292,7 +309,7 @@ This function makes a copy of the `local-opt` object, so you can freely change y
 Initial step size
 -----------------
 
-Just as in the C API, you can [get and set the initial step sizes](NLopt_Reference#Initial_step_size.md) for derivative-free optimization algorithms. The Guile equivalents of the C functions are the following methods:
+Just as in the C API, you can [get and set the initial step sizes](NLopt_Reference.md#initial-step-size) for derivative-free optimization algorithms. The Guile equivalents of the C functions are the following methods:
 
 ```
 (nlopt-opt-set-initial-step opt dx)
@@ -305,7 +322,7 @@ Here, `dx` is a vector or list of the (nonzero) initial steps for each dimension
 Stochastic population
 ---------------------
 
-Just as in the C API, you can [get and set the initial population](NLopt_Reference#Stochastic_population.md) for stochastic optimization algorithms, by the methods:
+Just as in the C API, you can [get and set the initial population](NLopt_Reference.md#stochastic-population) for stochastic optimization algorithms, by the methods:
 
 ```
 (nlopt-opt-set-population opt pop)
@@ -337,7 +354,7 @@ where `seed` is an integer. o reset the seed based on the system time, you can c
 Vector storage for limited-memory quasi-Newton algorithms
 ---------------------------------------------------------
 
-Just as in the C API, you can get and set the [number *M* of stored vectors](NLopt_Reference#Vector_storage_for_limited-memory_quasi-Newton_algorithms.md) for limited-memory quasi-Newton algorithms, via the functions:
+Just as in the C API, you can get and set the [number *M* of stored vectors](NLopt_Reference.md#vector-storage-for-limited-memory-quasi-newton-algorithms) for limited-memory quasi-Newton algorithms, via the functions:
 
 ```
 (nlopt-opt-set-vector-storage opt M)
@@ -361,4 +378,4 @@ To determine the version number of NLopt at runtime, you can call:
 
 For example, NLopt version 3.1.4 would return `major=3`, `minor=1`, and `bugfix=4`.
 
-[Category:NLopt](index.md)
+

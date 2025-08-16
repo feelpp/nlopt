@@ -126,14 +126,14 @@ static double c_b7 = 0.;
 /* RECURRENCES. */
 
 static void pnet_(int *nf, int *nb, double *x, int *
-		  ix, double *xl, double *xu, double *gf, double *gn, 
-		  double *s, double *xo, double *go, double *xs, 
-		  double *gs, double *xm, double *gm, double *u1, 
-		  double *u2, double *xmax, double *tolx, double *tolf, 
+		  ix, double *xl, double *xu, double *gf, double *gn,
+		  double *s, double *xo, double *go, double *xs,
+		  double *gs, double *xm, double *gm, double *u1,
+		  double *u2, double *xmax, double *tolx, double *tolf,
 		  double *tolb, double *tolg, nlopt_stopping *stop,
 		  double *minf_est, double *
-		  gmax, double *f, int *mit, int *mfv, int *mfg, 
-		  int *iest, int *mos1, int *mos2, int *mf, 
+		  gmax, double *f, int *mit, int *mfv, int *mfg,
+		  int *iest, int *mos1, int *mos2, int *mf,
 		  int *iterm, stat_common *stat_1,
 		  nlopt_func objgrad, void *objgrad_data)
 {
@@ -156,7 +156,6 @@ static void pnet_(int *nf, int *nb, double *x, int *
     double rho, eps;
     int mmx;
     double alf1, alf2, eta0, eta9, par1, par2;
-    int mes1, mes2, mes3;
     double rho1, rho2, eps8, eps9;
     int mred, iold, nred;
     double maxf, dmax__;
@@ -173,6 +172,8 @@ static void pnet_(int *nf, int *nb, double *x, int *
     double snorm;
     int mtesx, ntesx;
     ps1l01_state state;
+
+	(void) tolb;
 
 /*     INITIATION */
 
@@ -218,9 +219,6 @@ static void pnet_(int *nf, int *nb, double *x, int *
     ires2 = 0;
     mred = 10;
     mes = 4;
-    mes1 = 2;
-    mes2 = 2;
-    mes3 = 2;
     eps = .8;
     eta0 = 1e-15;
     eta9 = 1e120;
@@ -307,7 +305,7 @@ static void pnet_(int *nf, int *nb, double *x, int *
 L11020:
     luksan_pytrcg__(nf, nf, &ix[1], &gf[1], &umax, gmax, &kbf, &iold);
     luksan_mxvcop__(nf, &gf[1], &gn[1]);
-    luksan_pyfut1__(nf, f, &fo, &umax, gmax, xstop, stop, tolg, 
+    luksan_pyfut1__(nf, f, &fo, &umax, gmax, xstop, stop, tolg,
 	    &kd, &stat_1->nit, &kit, mit, &stat_1->nfg, mfg, &
 	    ntesx, &mtesx, &ntesf, &mtesf, &ites, &ires1, &ires2, &irest, &
 	    iters, iterm);
@@ -516,7 +514,7 @@ L12560:
 	goto L11075;
     }
 L11060:
-    luksan_ps1l01__(&r__, &rp, f, &fo, &fp, &p, &po, &pp, minf_est, &maxf, &rmin, 
+    luksan_ps1l01__(&r__, &rp, f, &fo, &fp, &p, &po, &pp, minf_est, &maxf, &rmin,
 	    &rmax, &tols, &tolp, &par1, &par2, &kd, &ld, &stat_1->nit, &kit, &
 	    nred, &mred, &maxst, iest, &inits, &iters, &kters, &mes,
 		    &isys, &state);
@@ -569,17 +567,17 @@ L11080:
 nlopt_result luksan_pnet(int n, nlopt_func f, void *f_data,
 			 const double *lb, const double *ub, /* bounds */
 			 double *x, /* in: initial guess, out: minimizer */
-			 double *minf, 
+			 double *minf,
 			 nlopt_stopping *stop,
 			 int mf, /* subspace dimension (0 for default) */
-			 int mos1, int mos2) /* 1 or 2 */
+			 int mos1, int mos2, /* 1 or 2 */
+			 double tolg) /* gradient tolerance */
 {
      int i, *ix, nb = 1;
      double *work;
      double *xl, *xu, *gf, *gn, *s, *xo, *go, *xs, *gs, *xm, *gm, *u1, *u2;
      double gmax, minf_est;
      double xmax = 0; /* no maximum */
-     double tolg = 0; /* default gradient tolerance */
      int iest = 0; /* we have no estimate of min function value */
      int mit = 0, mfg = 0; /* default no limit on #iterations */
      int mfv = stop->maxeval;
@@ -591,14 +589,14 @@ nlopt_result luksan_pnet(int n, nlopt_func f, void *f_data,
 
      if (mf <= 0) {
 	  mf = MAX2(MEMAVAIL/n, 10);
-	  if (stop->maxeval && stop->maxeval <= mf)
+	  if (stop->maxeval > 0 && stop->maxeval <= mf)
 	       mf = MAX2(stop->maxeval, 1);
      }
 
  retry_alloc:
-     work = (double*) malloc(sizeof(double) * (n * 9 + MAX2(n,n*mf)*2 + 
+     work = (double*) malloc(sizeof(double) * (n * 9 + MAX2(n,n*mf)*2 +
 					       MAX2(n,mf)*2));
-     if (!work) { 
+     if (!work) {
 	  if (mf > 0) {
 	       mf = 0; /* allocate minimal memory */
 	       goto retry_alloc;
@@ -608,7 +606,7 @@ nlopt_result luksan_pnet(int n, nlopt_func f, void *f_data,
      }
 
      xl = work; xu = xl + n;
-     gf = xu + n; gn = gf + n; s = gn + n; 
+     gf = xu + n; gn = gf + n; s = gn + n;
      xo = s + n; go = xo + n; xs = go + n; gs = xs + n;
      xm = gs + n; gm = xm + MAX2(n*mf,n);
      u1 = gm + MAX2(n*mf,n); u2 = u1 + MAX2(n,mf);
@@ -627,7 +625,7 @@ nlopt_result luksan_pnet(int n, nlopt_func f, void *f_data,
 	arrays to zero by default? */
      memset(xo, 0, sizeof(double) * MAX2(n,n*mf));
 
-     pnet_(&n, &nb, x, ix, xl, xu, 
+     pnet_(&n, &nb, x, ix, xl, xu,
 	   gf, gn, s, xo, go, xs, gs, xm, gm, u1, u2,
 	   &xmax,
 

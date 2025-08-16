@@ -29,7 +29,7 @@ Usage
 
 ### I included your header file, but the compiler still complains
 
-You need to link to the NLopt library in addition to doing `#include` <nlopt.h>. On Unix, this means adding `-lnlopt` `-lm` at the *end* of your link command.
+You need to link to the NLopt library in addition to doing `#include <nlopt.h>`. On Unix, this means adding `-lnlopt` `-lm` at the *end* of your link command.
 
 ### It's not converging
 
@@ -37,4 +37,4 @@ The most common cause of convergence problems is if you use a gradient-based alg
 
 You could also try switching algorithms to see if it is a problem in a particular algorithm (but check the gradient first!).
 
-[Category:NLopt](index.md)
+

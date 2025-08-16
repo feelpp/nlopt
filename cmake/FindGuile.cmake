@@ -18,6 +18,7 @@
 # Macports for OSX puts things in /opt/local
 find_path (GUILE_INCLUDE_DIR libguile.h
   PATH_SUFFIXES
+    guile/3.0
     guile/2.2
     guile/2.0
     guile/1.8
@@ -27,7 +28,7 @@ find_path (GUILE_INCLUDE_DIR libguile.h
 )
 
 # Look for the library
-find_library (GUILE_LIBRARY NAMES guile-2.2 guile-2.0 guile
+find_library (GUILE_LIBRARY NAMES guile-3.0 guile-2.2 guile-2.0 guile
   HINTS
     /opt/local/lib
 )
@@ -36,6 +37,10 @@ find_library (GUILE_LIBRARY NAMES guile-2.2 guile-2.0 guile
 set (GUILE_LIBRARIES ${GUILE_LIBRARY})
 set (GUILE_INCLUDE_DIRS ${GUILE_INCLUDE_DIR})
 
+find_path (GMP_INCLUDE_DIR gmp.h)
+if (GMP_INCLUDE_DIR)
+  list (APPEND GUILE_INCLUDE_DIRS ${GMP_INCLUDE_DIR})
+endif ()
 
 # check guile's version if we're using cmake >= 2.6
 if (GUILE_INCLUDE_DIR)
@@ -63,11 +68,11 @@ if (GUILE_INCLUDE_DIR)
 endif ()
 
 find_program(GUILE_EXECUTABLE
-              NAMES guile
+              NAMES guile3.0 guile2.2 guile2.0 guile
            )
 
 find_program(GUILE_CONFIG_EXECUTABLE
-              NAMES guile-config
+              NAMES guile-config3.0 guile-config2.2 guile-config2.0 guile-config
            )
 
 

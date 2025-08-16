@@ -26,12 +26,7 @@ typedef objgrad* Pobjgrad ;
 
 class GlobalParams {
 public:
-#ifdef NLOPT_UTIL_H
   nlopt_stopping *stop;
-#else
-  double maxtime;
-  long int maxeval;
-#endif
   double eps_cl, mu, rshift;
   int det_pnts, rnd_pnts;
 };
@@ -44,29 +39,30 @@ public:
   Pgrad Gradient ;
   long int numeval;
 
-  virtual double ObjectiveGradient(RCRVector xy, RVector&grad, whichO which){
+  virtual double ObjectiveGradient(RCRVector xy, RVector&gradient, whichO which){
        ++numeval;
        switch (which) {
 	   case OBJECTIVE_AND_GRADIENT:
-		Gradient(xy, grad);
+		Gradient(xy, gradient);
+		return Objective(xy);
 	   case OBJECTIVE_ONLY:
 		return Objective(xy);
 	   case GRADIENT_ONLY:
-		Gradient(xy, grad);
+		Gradient(xy, gradient);
        }
        return 0.0;
   }
-				   
+
   Global(RTBox, Pobj, Pgrad, GlobalParams);
-  
+
   virtual ~Global(){};
 
 //  Global& operator=(const Global &);
 
   void Search(int, RCRVector);
   void DispMinimizers();
-  double OneMinimizer(RCRVector);
-  bool NoMinimizers();
+  virtual double OneMinimizer(RCRVector);
+  virtual bool NoMinimizers();
   void SetDomain(RTBox);
   void GetDomain(RTBox);
   double GetMinValue();
@@ -77,7 +73,7 @@ public:
   double GetTime();
   bool InTime();
 
-private:
+protected:
   list<Trial> SolSet;
   list<Trial>::const_iterator titr;
   priority_queue<TBox> CandSet;

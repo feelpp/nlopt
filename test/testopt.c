@@ -7,17 +7,17 @@
  * distribute, sublicense, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be
  * included in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
  * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
  * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
- * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 #include <stdlib.h>
@@ -30,7 +30,7 @@
 #ifdef HAVE_UNISTD_H
 #  include <unistd.h>
 #endif
-#ifdef HAVE_GETOPT_H
+#if defined(HAVE_GETOPT_H) && defined(HAVE_GETOPT)
 #  include <getopt.h>
 #else
 #  include "nlopt-getopt.h"
@@ -49,6 +49,7 @@ extern "C" int feenableexcept(int EXCEPTS);
 
 static nlopt_algorithm algorithm = NLOPT_GN_DIRECT_L;
 static double ftol_rel = 0, ftol_abs = 0, xtol_rel = 0, xtol_abs = 0, minf_max_delta;
+static double initial_step = 0;
 static int maxeval = 1000, iterations = 1, center_start = 0;
 static double maxtime = 0.0;
 static double xinit_tol = -1;
@@ -235,6 +236,8 @@ static int test_function(int ifunc)
         nlopt_set_xtol_abs(opt, xtabs);
         nlopt_set_maxeval(opt, maxeval);
         nlopt_set_maxtime(opt, maxtime);
+        if (initial_step != 0)
+            nlopt_set_initial_step1(opt, initial_step);
         ret = nlopt_optimize(opt, x, &minf);
         printf("finished after %g seconds.\n", nlopt_seconds() - start);
         printf("return code %d from nlopt_minimize\n", ret);
@@ -290,16 +293,21 @@ static void usage(FILE * f)
             " -a <n> : use optimization algorithm <n>\n"
             " -o <n> : use objective function <n>\n"
             " -0 <x> : starting guess within <x> + (1+<x>) * optimum\n"
-            " -b <dim0,dim1,...>: eliminate given dims by equating bounds\n"
+            " -S <dx>: initial step size dx (default: none)\n"
+            " -b <dim0,dim1,...>: eliminate given dims by equating bounds\n");
+    fprintf(f,
             "     -c : starting guess at center of cell\n"
             "     -C : put optimum outside of bound constraints\n"
             " -e <n> : use at most <n> evals (default: %d, 0 to disable)\n"
             " -t <t> : use at most <t> seconds (default: disabled)\n"
             " -x <t> : relative tolerance <t> on x (default: disabled)\n"
-            " -X <t> : absolute tolerance <t> on x (default: disabled)\n"
+            " -X <t> : absolute tolerance <t> on x (default: disabled)\n", maxeval);
+    fprintf(f,
             " -f <t> : relative tolerance <t> on f (default: disabled)\n"
             " -F <t> : absolute tolerance <t> on f (default: disabled)\n"
-            " -m <m> : stop when minf+<m> is reached (default: disabled)\n" " -i <n> : iterate optimization <n> times (default: 1)\n" " -r <s> : use random seed <s> for starting guesses\n", maxeval);
+            " -m <m> : stop when minf+<m> is reached (default: disabled)\n"
+            " -i <n> : iterate optimization <n> times (default: 1)\n"
+            " -r <s> : use random seed <s> for starting guesses\n");
 }
 
 int main(int argc, char **argv)
@@ -317,7 +325,7 @@ int main(int argc, char **argv)
     feenableexcept(FE_INVALID);
 #endif
 
-    while ((c = getopt(argc, argv, "hLvCc0:r:a:o:i:e:t:x:X:f:F:m:b:")) != -1)
+    while ((c = getopt(argc, argv, "hLvVCc0:r:a:o:i:e:t:x:X:f:F:m:b:S:")) != -1)
         switch (c) {
         case 'h':
             usage(stdout);
@@ -329,6 +337,12 @@ int main(int argc, char **argv)
         case 'v':
             testfuncs_verbose = 1;
             break;
+        case 'V': {
+            int major, minor, patch;
+            nlopt_version(&major, &minor, &patch);
+            printf("NLopt version %d.%d.%d\n", major, minor, patch);
+            return EXIT_SUCCESS;
+        }
         case 'C':
             force_constraints = 1;
             break;
@@ -378,6 +392,9 @@ int main(int argc, char **argv)
         case '0':
             center_start = 0;
             xinit_tol = atof(optarg);
+            break;
+        case 'S':
+            initial_step = atof(optarg);
             break;
         case 'b':{
                 const char *s = optarg;
