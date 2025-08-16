@@ -22,7 +22,8 @@ if (NUMPY_FOUND AND Python_FOUND)
 
   # swig_add_module is deprecated
   swig_add_library (nlopt_python LANGUAGE python SOURCES nlopt.i)
-
+  
+  target_compile_options(nlopt_python PRIVATE -include ${CMAKE_CURRENT_SOURCE_DIR}/py311_compat.h)
   target_include_directories (nlopt_python PRIVATE ${Python_INCLUDE_DIRS})
   target_include_directories (nlopt_python PRIVATE ${NUMPY_INCLUDE_DIRS})
 
